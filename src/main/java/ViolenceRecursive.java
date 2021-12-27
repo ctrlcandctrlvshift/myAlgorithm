@@ -211,7 +211,68 @@ public static void process3(char [] str, int i, ArrayList<String> res){
 
     //范围上尝试模型
     //给定一个整数数组arr，代表数值不同的纸牌排成一条线
-    
+    //玩家A和玩家B一次拿走每张纸牌
+    //规定玩家A先拿，玩家B后拿
+    //但是每个玩家每次只能拿走最左最右的纸牌
+    //玩家A和玩家B绝顶聪明，请返回最后获胜者分数
+    //我是先手
+    public static int f(int arr[],int l,int r){
+        if (l==r){
+            return arr[l];
+        }
+        //先手选了之后  后手选了之后先手再选得出的分数
+        //两个动作：一步是我自己选 另外一步是大家一起选
+        //ps:因为是两人游戏 先手不选的  必然是后手 所以总能返回最大值
+//      arr[l]+s(arr,l+1,r)如果是先手  那么arr[r]+s(arr,l,r-1)必然是后手 反之也一样
+        return Math.max(arr[l]+s(arr,l+1,r),arr[r]+s(arr,l,r-1));
+    }
+    //先手之后的步骤 先手是不知道后手拿哪个数，但是知道必然是拿大数，所以后续先手只能返回最小的数
+    public static int s(int arr[],int l,int r){
+        if (l==r){
+            return arr[l];
+        }
+        //不知道后手拿的那一步  可以得知 后手必然拿最大那个数
+        return Math.min(f(arr,l+1,r),f(arr, l, r-1));
+    }
+
+
+    //n皇后问题
+    //i行
+    //m指的是位置m[0]=7 0行7列
+    //总n行
+    public static int process7(int [] m,int i,int n){
+        if (i==n){
+            return 1;
+        }
+        int res=0;
+        for (int j = 0; j <n ; j++){
+            if (isOk(m,i,j)){
+                m[i]=j;
+                res+=process7(m,i+1,n);
+            }
+        }
+return res;
+    }
+
+    //j为列
+    //i为行
+    //a b c d
+    //斜边
+    //|a-c|==|b-d|
+    public static boolean isOk(int [] m,int i,int j){
+        for (int k = 0; k <i ; k++) {
+            if (j==m[k]||Math.abs(i-k)==Math.abs(j-m[k])){
+                return false;
+            }
+        }
+return true;
+    }
+
+    //位运算优化 n皇后
+
+
+
+
 
 
 
