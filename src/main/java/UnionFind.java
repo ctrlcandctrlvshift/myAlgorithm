@@ -421,8 +421,6 @@ return minNode;
             this.node1 = node1;
         }
     }
-
-
     //特制dijksta小根堆
     public static class NodeHead{
         List <Node1> nodeList=new ArrayList<>();

@@ -585,17 +585,104 @@ return ways;
                 }
                 dp[index][rest]=ways;
             }
-
         }
 return dp[0][aim];
     }
 
+    public static int moneyDp2(int[] arr, int aim){
+        if (arr==null||arr.length==0||aim<0){
+            return 0;
+        }
+        int N=arr.length;
+        int [][]dp=new int[N+1][aim+1];
+        dp[N][0]=1;
+        for (int index = N-1; index >=0 ; index--) {
+            for (int rest = 0; rest <=aim ; rest++) {
+                //根据上面的题优化
+                dp[index][rest]=dp[index+1][rest];
+                if (rest-arr[index]>=0){
+                    dp[index][rest]+=dp[index][rest-arr[index]];
+                }
+            }
+        }
+        return dp[0][aim];
+    }
+
+
+//    给定一个字符串str，给定一个字符串类型的数组arr。
+//    arr里的每
+//    一个字符串，代表一张贴纸，你可以把单个字符剪开使用，目的是
+//    拼出str来。
+//    返回需要至少多少张贴纸可以完成这个任务。
+//    例子：str= "babac', arr = mba',"'c",'abcd"]
+//    至少需要两张贴纸"ba"和"abcd"
+//    因为使用这两张贴纸，把每一个字符单独剪
+//    开，含有2个a、2个b、1个c。是可以拼出str的。所以返回2.
+    public static int minTags(String tags,String[] stickers){
+        int n=stickers.length;
+        int [][]map= new int[n][26];
+        for (int i = 0; i <stickers.length ; i++) {
+            char[] str=stickers[i].toCharArray();
+            for (char c:str){
+                map[i][c-'a']++;
+            }
+        }
+        //缓存
+        HashMap<String,Integer> dp=new HashMap<>();
+        dp.put("",0);
+        return minTagProcess(tags,map,dp);
+
+    }
+    //返回值为-1，map中的贴纸怎么都不会返回完成
+    public static int minTagProcess(String rest,int [][]map,HashMap<String,Integer>dp){
+        if (dp.containsKey(rest)){
+            return dp.get(rest);
+        }
+
+        int next=Integer.MAX_VALUE;
+        int n=map.length;
+        char [] chars=rest.toCharArray();
+        int[] tmap=new int[26];
+        for (char c:chars){
+            tmap[c-'a']++;
+        }
+
+        //枚举第一张贴纸是谁
+        for (int i = 0; i <n ; i++) {
+            //当有一个与贴纸上的值完全无关的出现  就会无限rest递归  如：a贴纸
+            // 需要bc值 那么递归会一直循环a
+            if (map[i][chars[0]-'a']==0){
+                continue;
+            }
+            StringBuilder sb=new StringBuilder();
+            //枚举每个字符的变化
+            for (int j = 0; j <26 ; j++) {
+                if (tmap[j]>0){
+                    for (int k = 0; k <Math.max(0,tmap[j]-map[i][j]) ; k++) {
+                        sb.append((char) ('a' +j));
+                    }
+                }
+            }
+
+            String s=sb.toString();
+            int tmp=minTagProcess(s,map,dp);
+            if (tmp!=-1){
+                next=Math.min(next,tmp+1);
+            }
+    }
+        //next默认值int系统最大
+        dp.put(rest,next==Integer.MAX_VALUE?-1:next);
+        return dp.get(rest);
+    }
+
+
+
+
+
     public static void main(String[] args) {
-        int arr[]={10,20};
-        int aim=100;
-        System.out.println(moneyWay2(arr, aim));
-        System.out.println(moneyWay1(arr, aim));
-        System.out.println(moneyDp(arr, aim));
+        String s="abc";
+        String[] str={"ab","b","c"};
+        System.out.println(minTags(s, str));
     }
 
 
