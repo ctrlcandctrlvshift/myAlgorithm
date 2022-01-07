@@ -675,21 +675,139 @@ return dp[0][aim];
         return dp.get(rest);
     }
 
+//两个字符串的最长公共子序列
+    public static int publicString(char[] p1,char [] p2){
+        int[][]dp=new int[p1.length][p2.length];
 
+        dp[0][0]=p1[0]==p2[0]?1:0;
+        //dp[i][0]位置的值
+        for (int i = 1; i <p1.length ; i++) {
+            dp[i][0]=Math.max(dp[i-1][0],p1[i]==p2[0]?1:0);
+        }
+        //dp[0][i]位置的值
+        for (int i = 1; i <p2.length ; i++) {
+            dp[0][i]=Math.max(dp[0][i-1],p1[0]==p2[i]?1:0);
+        }
 
+        for (int i = 1; i <p1.length ; i++) {
+            for (int j = 1; j <p2.length ; j++) {
+                dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
+                if (p1[i]==p2[j]){
+                    dp[i][j]=Math.max(dp[i][j],dp[i-1][j-1]+1);
+                }
+            }
 
-
-    public static void main(String[] args) {
-        String s="abc";
-        String[] str={"ab","b","c"};
-        System.out.println(minTags(s, str));
+        }
+        return dp[p1.length-1][p2.length-1];
     }
 
 
 
+//    给定一个数组，代表每个人喝完咖啡准备刷杯子的时间
+//    只有一台咖啡机，
+//    一次只能洗一个杯子，时间耗费a，洗完才能洗下一杯
+//    每个咖啡杯也可以自己挥发干净，时间耗费b，咖啡杯可以并行挥发
+// 返回让所有咖啡杯变干净的最早完成时间
+    //只有两种选择 要么静止挥发 要么拿去洗
+//    三个参数：int[]arr、int a、 int b
+    //同时喝的
+
+    //washLine 表示洗的机器还要等何时可用
+    //a 洗的时间
+    //b 挥发时间
+    public static int processCoffe(int []arr,int a,int b,int index,int washLine){
+        if (index==arr.length-1){
+            //找出挥发时间短还是洗的时间短
+            return Math.min(Math.max(washLine,arr[arr.length-1]+a),arr[arr.length-1]+b);
+        }
+
+        //剩不止一杯咖啡
+        //wash 洗完这一杯咖啡的时间点
+        int wash=Math.max(washLine,arr[index])+a;
+        //index+1 变干净的最早时间
+        int next1=processCoffe(arr,a,b,index+1,wash);
+        //哪个最大拿哪个时间
+        int p1=Math.max(wash,next1);
+
+        //这杯没有洗
+        int dry=arr[index]+b;
+        int next2=processCoffe(arr,a,b,index+1,washLine);
+        int p2=Math.max(dry,next2);
+        return Math.min(p1,p2);
+
+    }
+
+    public static int dpCoffe(int []arr,int a,int b){
+        if (a>=b){
+            //arr 排好了顺序
+            return arr[arr.length-1]+b;
+        }
+        int n=arr.length;
+        int limit=0;
+        for (int i = 0; i <arr.length ; i++) {
+            limit=Math.max(limit,arr[i]+a);
+        }
+        int[][]dp=new int[n][limit+1];
+
+        //n-1行 basecase
+        for (int washLine = 0; washLine < limit; washLine++) {
+            dp[n-1][washLine]=Math.min(Math.max(washLine,arr[arr.length-1]+a),arr[arr.length-1]+b);
+        }
+
+        for (int index = n-2; index >=0 ; index--) {
+            for (int washLine = 0; washLine <=limit ; washLine++) {
+
+
+                int p1=Integer.MAX_VALUE;
+                int wash=Math.max(washLine,arr[index])+a;
+                if (wash<=limit){
+                    p1=Math.max(wash,dp[index+1][wash]);
+                }
+                int p2=Math.max(arr[index]+b,dp[index+1][washLine]);
+
+                dp[index][washLine]=  Math.min(p1,p2);
+
+
+//
+//                int next1=processCoffe(arr,a,b,index+1,wash);
+//                //哪个最大拿哪个时间
+//                int p1=Math.max(wash,next1);
+
+//                //这杯没有洗
+//                int dry=arr[index]+b;
+//                int next2=processCoffe(arr,a,b,index+1,washLine);
+//                int p2=Math.max(dry,next2);
+//                return Math.min(p1,p2);
+            }
+        }
+
+        //return Math.min(Math.max(washLine,arr[arr.length-1]+a),arr[arr.length-1]+b)
+
+
+
+        return dp[0][0];
 
 
 
 
+
+
+
+
+
+
+
+    }
+
+
+    public static void main(String[] args) {
+        int arr[]={1,1,5,5,7,10,12,12,12,12,12,12,15};
+        int a=3;
+        int b=10;
+        System.out.println(processCoffe(arr, a, b, 0, 0));
+        System.out.println(dpCoffe(arr, a, b));
+
+
+    }
 
 }

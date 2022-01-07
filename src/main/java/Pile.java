@@ -257,6 +257,55 @@ public class Pile {
             heapify(valueIndex,heapSize);
         }
 
+        //一个数据流  随时取得中位数
+        //建大小根堆
+        //当前的数值是否小于等于大根堆堆顶  是 入 不是入小根堆
+        //看大小堆的size  当size相差2  size大的堆堆顶弹出进size小的堆
+
+        public static class ComparatorMy implements Comparator<Integer>{
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2-o1;
+            }
+        }
+
+        public static int getMid(int[]arr){
+            PriorityQueue<Integer> smallQueue=new PriorityQueue<>();
+            PriorityQueue<Integer> bigQueue=new PriorityQueue<>(new ComparatorMy());
+            int n=arr.length;
+            bigQueue.add(arr[0]);
+            for (int i = 1; i < n; i++) {
+                if (arr[i] <= bigQueue.peek()) {
+                    bigQueue.add(arr[i]);
+                } else {
+                    smallQueue.add(arr[i]);
+                }
+                int ssz = smallQueue.size();
+                int bsz = bigQueue.size();
+                if (Math.abs(ssz-bsz)==2){
+                    if (ssz-bsz>0){
+                        bigQueue.add(smallQueue.poll());
+                    }else {
+                        smallQueue.add(bigQueue.poll());
+                    }
+                }
+            }
+            if ((n&1)==0){
+                return (bigQueue.peek()+smallQueue.peek())>>1;
+            }else {
+             if (bigQueue.size()>smallQueue.size()){
+                 return bigQueue.peek();
+             }else {
+                 return smallQueue.peek();
+             }
+            }
+        }
+
+        public static void main(String[] args) {
+            int arr[]={1,2,3,4,5,67,8};
+            System.out.println(getMid(arr));
+        }
+
 
 
 

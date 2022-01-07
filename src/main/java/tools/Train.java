@@ -1,6 +1,7 @@
 package tools;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -56,5 +57,49 @@ public class Train {
         }
         return  preb(queue);
     }
+
+
+
+
+    //Given a string s, partition s such that every substring of the partition is a palindrome. Return all possible palindrome partitioning of s.
+    //A palindrome string is a string that reads the same backward as forward.
+
+//
+//    Example 1:
+//    Input: s = "aab"
+//    Output: [["a","a","b"],["aa","b"]]
+    public static List<List<String>> partition(String s) {
+        if (s==null||s.length()==0){
+            return null;
+        }
+        return null;
+    }
+    public static void precess(){
+
+
+
+
+
+    }
+
+    public static boolean isPalindrome(String s,int low,int high){
+        while (low<high){
+            if (s.charAt(low++)!=s.charAt(high--)) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+
+
+
+
+
+
+
+
+
 
 }
