@@ -438,6 +438,47 @@ public class BinaryTree {
         return head;
     }
 
+    public static class InfoBST{
+        boolean isBST;
+        int max;
+        int min;
+
+        public InfoBST(boolean isBST, int max, int min) {
+            this.isBST = isBST;
+            this.max = max;
+            this.min = min;
+        }
+    }
+    public static boolean isBST(Node head){
+        if (head==null){
+            return true;
+        }
+        InfoBST bst=processBST(head);
+        return bst.isBST;
+    }
+    public static InfoBST processBST(Node head){
+        if (head==null){
+            return new InfoBST(true,0,0);
+        }
+
+        InfoBST left=processBST(head.left);
+        InfoBST right=processBST(head.right);
+
+        if (left.isBST&&right.isBST){
+            int max=left.max;
+            int min=right.min;
+            if (max>head.value||min<head.value){
+                return new InfoBST(false,0,0);
+            }else {
+                max=Math.max(Math.max(max,min),head.value);
+                min=Math.min(Math.min(max,min),head.value);
+                return new InfoBST(true,max,min);
+            }
+        }else {
+            return new InfoBST(false,0,0);
+        }
+
+    }
 
 
     //打印一棵二叉树 (未完成)
@@ -472,7 +513,6 @@ public class BinaryTree {
             this.value = value;
         }
     }
-
     public static void in2(Node1 head){
         if (head==null){
             return;
@@ -489,7 +529,6 @@ public class BinaryTree {
             }
         }
     }
-
     //后继
     public static Node1 getSuccessorNode(Node1 node){
         if (node ==null){
@@ -604,7 +643,6 @@ public class BinaryTree {
     //与X节点是否有关
     //无关：max（左最大距离，右最大距离）
     //有关：左高+右高+1
-
     public static class Info2{
         //最大距离
         public int maxDistance;
@@ -689,6 +727,28 @@ public class BinaryTree {
 
 //1.X来 X.happy+其下属所有节点不来的happy总值
 //2.X不来 0+  其下属所有节点不来或者来的happy总值的max
+
+//    题目二
+//            派对的最大快乐值
+//    员工信息的定义如下：
+//    class Employee {
+//        public int happy;1 这名员工可以带来的快乐值
+//        List-Employee= subordinates;11 这名员工有哪些直接下级
+//        公司的每个员工都符合 Employee 类的描述。整个公司的人员结构可以看作是一棵标准的、
+//        没有环的
+//        多叉树，
+//        树的头节点是公司唯一的老板．
+//        除老板之外的每个员工都有唯一的直接上级。
+//        叶节点是没有
+//        任何下属的基层员 工(subordinates列表为空)，除基层员工外，每个员工都有一个或多个直接下级，
+//        这个公司现在要办party.
+//                你可以决定哪些员工来，哪些员工不来。但是要遵循如下规则。
+//                1如果某个员工来了
+//，那么这个员工的所有直接下级都不能来
+//2派对的整体快乐值是所有到场员工快乐值的累加
+//3.你的目标是让派对的整体快乐值尽量大
+//        给定一棵多叉树的头节点boss，请返回派对的最大快乐值。
+
     public static class Employee{
         public int happy;
         public List<Employee> nexts;
@@ -724,6 +784,58 @@ public class BinaryTree {
         }
         return new InfoH(yes,no);
     }
+
+
+    public static InfoH process(Employee e){
+        if (e.nexts.isEmpty()){
+            return new InfoH(e.happy,0);
+        }
+        int yes=e.happy;
+        int no=0;
+        for (Employee e1:e.nexts) {
+            InfoH nextInfo=process(e1);
+            yes+=nextInfo.no;
+            no+=Math.max(nextInfo.yes,nextInfo.no);
+        }
+
+
+return new InfoH(yes,no);
+
+    }
+
+
+//叉树节点间的最大距离问题
+//从二叉树的节点a出发，可以向上或者向下走，但沿途的节点只能经过一次，到达节点b时路
+//径上的节点个数叫作a到b的距离，那么二叉树任何两个节点之间都有距离，求整棵树上的最
+//大距离。
+    public static class InfoMax{
+        int height;
+        int maxDistance;
+
+    public InfoMax(int height, int maxDistance) {
+        this.height = height;
+        this.maxDistance = maxDistance;
+    }
+}
+public static InfoMax process(Node node){
+        if (node==null){
+            return new InfoMax(0,0);
+        }
+        InfoMax infoLeft=process(node.left);
+        InfoMax infoRight=process(node.right);
+        int p1=infoLeft.maxDistance;
+        int p2=infoRight.maxDistance;
+        int p3=infoLeft.height+1+infoRight.height;
+        int maxDistance=Math.max(p3,Math.max(p1,p2));
+        int height=Math.max(infoLeft.height,infoRight.height)+1;
+        return new InfoMax(height,maxDistance);
+}
+
+
+
+
+
+
 
 
 

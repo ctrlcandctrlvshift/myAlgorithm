@@ -37,11 +37,17 @@ public class MonotonousStack {
 
         }
          public HashMap<Integer, Node> getMinNode(){
+            //判断该段是否合法
             if (arr==null||arr.length==0){
                 return null;
             }
+            //循环arr数组  每个数只进一次栈
              for (int i = 0; i <arr.length ; i++) {
+                 //循环栈
                  while (!stack.isEmpty()){
+                     //栈维护成从小到大的
+                     //判断栈顶的数与是否比将要入栈的arr[i]要小
+                     //如果比
                      if (arr[i]>arr[stack.peek().getFirst()]){
                          LinkedList<Integer> p2=new LinkedList<>();
                          p2.add(i);
