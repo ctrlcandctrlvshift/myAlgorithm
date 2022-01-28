@@ -535,7 +535,7 @@ public static int process8(int limit, int colLimit,int leftDiam,
 return ways;
 
     }
-//记忆搜索
+    //记忆搜索
     public static int moneyWay1(int[] arr, int aim){
         if (arr==null||arr.length==0||aim<0){
             return 0;
@@ -707,10 +707,10 @@ return dp[0][aim];
 //    只有一台咖啡机，
 //    一次只能洗一个杯子，时间耗费a，洗完才能洗下一杯
 //    每个咖啡杯也可以自己挥发干净，时间耗费b，咖啡杯可以并行挥发
-// 返回让所有咖啡杯变干净的最早完成时间
-    //只有两种选择 要么静止挥发 要么拿去洗
+//    返回让所有咖啡杯变干净的最早完成时间
+//    只有两种选择 要么静止挥发 要么拿去洗
 //    三个参数：int[]arr、int a、 int b
-    //同时喝的
+//    同时喝的
 
     //washLine 表示洗的机器还要等何时可用
     //a 洗的时间
@@ -782,20 +782,7 @@ return dp[0][aim];
         }
 
         //return Math.min(Math.max(washLine,arr[arr.length-1]+a),arr[arr.length-1]+b)
-
-
-
         return dp[0][0];
-
-
-
-
-
-
-
-
-
-
 
     }
 

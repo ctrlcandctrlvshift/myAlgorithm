@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -652,7 +653,7 @@ public class Test1 {
         return new int[]{sum, count};
     }
 
-//arr数组返回词频最高的前k个
+    //arr数组返回词频最高的前k个
     //小根堆方法
     public static class PileNode{
         public String s;
@@ -663,7 +664,6 @@ public class Test1 {
         this.count = count;
     }
 }
-
     public static class PileComparater implements Comparator<PileNode>{
             @Override
             public int compare(PileNode o1, PileNode o2) {
@@ -709,20 +709,24 @@ public class Test1 {
         }
         return result;
     }
-    //结构
-    //更新top
 
-
-    public static class myPile<T>{
+    //手撸一个可以更新的小堆
+    public static class MyPile<T>{
         public int heapSize=0;
         public HashMap <T,Integer> indexMap=new HashMap<>();
         public ArrayList<T> arr=new ArrayList<>();
         public Comparator<T> comparator;
 
-        public myPile(Comparator<T> comparator) {
+        public MyPile(Comparator<T> comparator) {
             this.comparator = comparator;
         }
+        public boolean isContain(T t){
+            return indexMap.containsKey(t);
+        }
 
+        public int getSize(){
+            return heapSize;
+        }
         //从零开始的
         //head:index
         //left:2*index+1  right:2*index+2
@@ -764,7 +768,6 @@ public class Test1 {
             arr.set(p2,o1);
 
         }
-
         public void add(T t){
             if (t==null){
                 return;
@@ -797,6 +800,339 @@ public class Test1 {
         }
 
     }
+    //随时更新top
+    public static class TopSumSort{
+        //词频统计
+        HashMap<String, PileNode> collectMap=new HashMap<>();
+        //可更新的最小堆
+        MyPile<PileNode> piles=new MyPile<>(new PileComparater());
+        int top;
+
+        public TopSumSort(int top) {
+            this.top = top;
+        }
+
+        //维护top个数
+        public void add(String s){
+            if (top>piles.getSize()){
+                if (collectMap.containsKey(s)){
+                    //更新
+                    collectMap.get(s).count++;
+                    piles.regin(collectMap.get(s));
+                }else {
+                    //添加新的
+                    PileNode node=new PileNode(s,1);
+                    collectMap.put(s,node);
+                    piles.add(node);
+                }
+            }else {
+                if (collectMap.containsKey(s)){
+                    PileNode cur=collectMap.get(s);
+                    cur.count++;
+                    if (piles.isContain(cur)){
+                        piles.regin(cur);
+                    }else {
+                     if (cur.count>piles.peek().count){
+                         piles.pop();
+                         piles.add(cur);
+                     }
+                    }
+                }else {
+                    PileNode node=new PileNode(s,1);
+                    collectMap.put(s,node);
+                }
+
+            }
+        }
+
+        public String [] topPrint(){
+            String[] res=new String[top];
+            for (int i = 0; i <top ; i++) {
+                res[i]=piles.arr.get(i).s;
+                System.out.print(res[i]);
+            }
+            System.out.println();
+            return res;
+        }
+
+
+    }
+
+//动态规划的空间压缩技巧
+//给你一个二维数组matrix，其中每个数都是正数，要水从左上角走到右下角。每
+//一步只能向右或者向下，沿途经过的数宇要累加起来。最后请返口最小的路径和。
+    public static int sumMatrix(int [][] matrix){
+        if (matrix==null||matrix.length==0){
+            return 0;
+        }
+        return process(matrix,0,0);
+    }
+
+    //row 行
+    //col 列
+    public static int process(int [][] matrix,int row,int col){
+        if (row>=matrix.length||col>=matrix[0].length){
+            return Integer.MAX_VALUE;
+        }
+        if (row==matrix.length-1&&col==matrix[0].length-1){
+            return matrix[row][col];
+        }
+
+            int right=process(matrix,row,col+1);
+            int down=process(matrix,row+1,col);
+            return matrix[row][col]+Math.min(right,down);
+    }
+
+    public static int dpSumMatrix(int [][]matrix){
+        if (matrix==null||matrix.length==0){
+            return 0;
+        }
+        int rows=matrix.length;
+        int cols=matrix.length;
+        int [][]dp=new int[rows+1][cols+1];
+        for (int i = 0; i <cols+1 ; i++) {
+            dp[rows][i]=Integer.MAX_VALUE;
+        }
+        for (int i = 0; i <rows+1 ; i++) {
+            dp[i][cols]=Integer.MAX_VALUE;
+        }
+        for (int row = rows-1; row >=0; row--) {
+            for (int col = cols-1; col >=0 ; col--) {
+                if (row==matrix.length-1&&col==matrix[0].length-1){
+                    dp[row][col]=matrix[row][col];
+                    continue;
+                }
+                int right=dp[row][col+1];
+                int dowm=dp[row+1][col];
+                dp[row][col]= matrix[row][col]+Math.min(right,dowm);
+            }
+        }
+return dp[0][0];
+
+    }
+
+
+    //压缩dp  分析dp 得出解压形式
+    public static int compressDpSum(int [][]matrix){
+        if (matrix==null||matrix.length==0){
+            return 0;
+        }
+        int rows=matrix.length;
+        int cols=matrix.length;
+        int []dp=new int[cols];
+        //压缩好了
+        dp[cols-1]=matrix[rows-1][cols-1];
+        for (int i = cols-2; i>=0 ; i--) {
+            dp[i]=matrix[rows-1][i]+dp[i+1];
+        }
+
+        //解压
+        for (int i = rows-2; i >=0 ; i--) {
+            for (int j = cols-1; j >=0 ; j--) {
+                if (j==cols-1){
+                    dp[j]=dp[j]+matrix[i][j];
+                    continue;
+                }
+                int res=matrix[i][j]+Math.min(dp[j+1],dp[j]);
+                dp[j]=res;
+            }
+
+        }
+
+        return dp[0];
+    }
+
+    //给定一个数组arr，己知其中所有的值都是非负的，将这个数组看作一个容器，
+    //请返回容器能装多少水
+    //比如，arr = {3,1，2，5，2，4}，根据值画出的直方图就是容器形状，该容
+    //器可以装下5格水
+    //再比如，arr = {4,5，1，3，2}，该容器可以装下2格水
+    //有点像洗衣机那道题  中间分析左右  可装水值=Max（Min(左Max，右Max)-arr[i]，0）
+
+    public static int waterBucket(int [] arr){
+        if (arr==null||arr.length==0){
+            return 0;
+        }
+        int leftMax=arr[0];
+        int rightMax=arr[arr.length-1];
+        int left=1;
+        int right=arr.length-2;
+        int res=0;
+        //哪边max小结算哪边
+
+        while (left<=right){
+            //结算左边
+            if (leftMax<=rightMax){
+                res+=Math.max(leftMax-arr[left],0);
+                leftMax=Math.max(arr[left],leftMax);
+                left++;
+            }else
+                //结算右边
+            {
+                res+=Math.max(rightMax-arr[right],0);
+                rightMax=Math.max(arr[right],rightMax);
+                right--;
+            }
+        }
+        return res;
+    }
+    //给定一个数组arr长度为N，你可以把任意长度大于0且小于N的前缀作为左部分，剩下的
+    //作为右部分。但是每种划分下都有左部分的最大值和右部分的最大值，请返回最大的，
+    //左部分最大值减去右部分最大值的绝对值。
+
+    //取数组最大值先
+    //0 和 N-1 必是左右边的一个数
+    //所以谁小选谁
+    public static int maxLeftMaxRight(int [] arr){
+        int max=Integer.MIN_VALUE;
+        for (int i = 0; i <arr.length ; i++) {
+            max=Math.max(max,arr[i]);
+        }
+        return arr[0]>arr[arr.length-1]?max-arr[arr.length-1]:max-arr[0];
+    }
+
+    //如果一个字符串为str，把字符串str前面任意的部分挪到后面形成的字符串叫
+    //作str的旋转词。比如str="12345”
+    //str的旋转词有"12345"、
+    //1"23451"
+    //"34512"
+    //〝45123”和"51234”。给定两个字符串a和b，请判断a和b是否互为旋转
+    //词。
+    //比如：
+    //a="cdab"
+    //b="abcd”，返回true。
+    //a="1ab2"
+    //b="ab12
+    //返回false。
+    //a="2ab1
+    //b="ab12"
+    //返回true。
+    //解法  用两倍的a 如果b字符串存在两倍的a中 那么返回ture （主要是kmp这类算法）
+
+
+//有咖啡机煮咖啡的时间  arr[]={1,2,3} 串行煮咖啡
+    //有N个人想喝咖啡
+    //有一台洗咖啡机
+    //洗的时间为a
+    //挥发时间为b
+    //怎么搞时间最短 喝完和洗干净
+
+    //咖啡机可用时间
+
+    //问题1： 10个人最短拿到咖啡的时间arr也是什么时间开始洗的时间 （秒喝）（小根堆）
+    //暴力递归里的题（后面完成）
+
+
+    //给定一个数组arr，如果通过调整可以做到arr中任意两个相邻的数字相乘是4的倍数 返回true  不能false
+    //找出 奇数a  只有一个2因子b  包含4因子的数c
+    //1.b==0   a==1,c>=1  a>1 c>=a-1
+    //2.b!=0   a==0 c>=0  a>0  c>=a
+
+    public static boolean _4Num(int [] arr){
+        if (arr==null||arr.length==0){
+            return false;
+        }
+        int a=0;
+        int b=0;
+        int c=0;
+        for (int i = 0; i < arr.length; i++) {
+            if ((arr[i]&1)!=0){
+                a++;
+                continue;
+            }
+            if (arr[i]%2==0){
+                int p1=arr[i]%2;
+                if (arr[i]==2){
+                    b++;
+                    continue;
+                }
+                if (p1%2!=0){
+                    b++;
+                    continue;
+                }
+            }
+            if (arr[i]%4==0){
+                c++;
+                continue;
+            }
+        }
+        if (b==0){
+            if (a==1&&c>=1){
+                return true;
+            }
+            if (a>1&&c>=a-1){
+                return true;
+            }
+        }else {
+            if (a==0&&c>=0){
+                return true;
+            }
+
+            if (a>0 &&c>=a){
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+
+    //斐波拉列式递归套路  改logN
+    //公式：|F(n),F(n-1)|=|F(2),F(1)|*{{1,1}{1,0}}^n-2
+    //
+    public static int fi(int n){
+        if (n<=0){
+            return 0;
+        }
+        if (n==1||n==2){
+            return 1;
+        }
+        int [][]m={{1,1},{1,0}};
+        int[][]res=matrixPower(m,n-2);
+        return res[0][0]+res[1][0];
+    }
+
+
+    //求{1,1}{1,0}^n-2
+    public static int [][] matrixPower(int [][]m,int p){
+        int[][] res=new int[m.length][m[0].length];
+
+        for (int i = 0; i <res.length ; i++) {
+            res[i][i]=1;
+        }
+        int [][]t={{1,1},{1,0}};
+
+        for (; p !=0 ; p>>=1) {
+            if ((p&1)==1){
+                res=muliMatrix(res,t);
+            }
+            t=muliMatrix(t,t);
+        }
+return res;
+    }
+
+    //矩阵相乘
+    //k是指针 一个行动 一个列动
+    public static int [][] muliMatrix(int [][]p1,int [][]p2){
+        int [][]res=new int[p1.length][p1[0].length];
+        for (int i = 0; i <p1.length ; i++) {
+            for (int j = 0; j <p2[0].length ; j++) {
+                for (int k = 0; k <p2.length ; k++) {
+                    res[i][j]+=p1[i][k]*p2[k][j];
+                }
+            }
+        }
+        return res;
+    }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -813,18 +1149,8 @@ public class Test1 {
 
 
     public static void main(String[] args) {
-        myPile<PileNode> piles=new myPile<>(new PileComparater());
-        piles.add(new PileNode("b",3));
-        piles.add(new PileNode("c",2));
-        piles.add(new PileNode("d",4));
-        PileNode n=new PileNode("e",5);
-        piles.add(n);
-        System.out.println(piles.peek().s);
-        n.count=1;
-        piles.regin(n);
-        System.out.println(piles.peek().s);
-
-
+        int [] arr={2,2,1,4};
+        System.out.println(_4Num(arr));
 
     }
 }
