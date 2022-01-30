@@ -1077,19 +1077,22 @@ return dp[0][0];
     }
 
 
-    //斐波拉列式递归套路  改logN
+    //斐波那契数列式递归套路  改logN  F(n)=F(n-1)+F(n-2)
     //公式：|F(n),F(n-1)|=|F(2),F(1)|*{{1,1}{1,0}}^n-2
     //
     public static int fi(int n){
-        if (n<=0){
+        if (n<1){
             return 0;
         }
-        if (n==1||n==2){
+        if (n==1){
             return 1;
+        }
+        if (n==2){
+            return 2;
         }
         int [][]m={{1,1},{1,0}};
         int[][]res=matrixPower(m,n-2);
-        return res[0][0]+res[1][0];
+        return 2*res[0][0]+res[1][0];
     }
 
 
@@ -1101,7 +1104,7 @@ return dp[0][0];
             res[i][i]=1;
         }
         int [][]t={{1,1},{1,0}};
-
+// p>>=1 是 p=p>>1
         for (; p !=0 ; p>>=1) {
             if ((p&1)==1){
                 res=muliMatrix(res,t);
@@ -1125,32 +1128,123 @@ return res;
         return res;
     }
 
+    //套路
+    //牛生牛问题  3年可以生牛
+    //问几年后有多少牛
+    //F（N）=F（N-1）+F（N-3）
+    //最大3阶
+
+    //递归版本 o（n）
+    public static int processCow(int n){
+        if (n<1){
+            return 0;
+        }
+        if (n==1){
+            return 1;
+        }
+        if (n==2){
+            return 2;
+        }
+        if (n==3){
+            return 3;
+        }
+        int p1=processCow(n-1);
+        int p2=processCow(n-3);
+        return p1+p2;
+    }
+
+    //斐波那契数列套路版本
+    //log（N）
+    // 3X3 m={}
+    //公式 ：|F（N）F（N-1）F（N-2）|=|F（3）F（2）F（1）|*m{}^n-2
+    //和上面一样
+    //未完成  m太难求了
+    public static int cows(int n){
+        if (n<1){
+            return 0;
+        }
+        if (n==1){
+            return 1;
+        }
+        if (n==2){
+            return 2;
+        }
+        if (n==3){
+            return 3;
+        }
+
+        return 0;
+
+
+    }
 
 
 
+    //宇符串只由‘0’和'1°两种宇符构成，
+    //当字符串长度为1时，所有可能的字符串为"0"
+    //"1":
+    //当字符串长度为2时，所有可能的字符串为"00”
+    //"01"
+    //"10",
+    //"11";
+    //当字符串长度为3时，所有可能的宇符串为"000"，
+    //001" "010", "011" "100"
+    //"101”
+    //’110"
+    //"111"
+    //如果某一个字符串中，只要是出现’0的位置，左边就靠着1°，这样的字符串叫作达
+    //标字符串
+    //给定一个正数N，返回所有长度为N的字符串中，达标字符串的数量。
+    //比如，N=3，返回3，因为只有101”、
+    //"110"
+    //"111"达标。
 
+    //暴力递归（不建议使用）
+    public static int _01arr(int n){
+        if (n<1){
+            return 0;
+        }
+        char []arr=new char[n];
+        return process01(n,arr,0);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
+    public static int process01(int n,char [] arr,int index){
+        if (index>n){
+            return 0;
+        }
+        if (index==n){
+            if (isOk(arr)){
+                return 1;
+            }
+            return 0;
+        }
+        arr[index]='1';
+        int p1=process01(n,arr,index+1);
+        arr[index]='0';
+        int p0=process01(n,arr,index+1);
+        return p1+p0;
+    }
+    public static boolean isOk(char [] arr){
+        int index=0;
+        while (index<arr.length){
+            if(arr[index]=='0'&&(index-1<0||arr[index-1]!='1')){
+                 return false;
+            }
+            index++;
+        }
+        return true;
+    }
+    //打表可知  上面是斐波那契数列
+    //F（N）=F（N-1）+F（N-2）
 
 
     public static void main(String[] args) {
-        int [] arr={2,2,1,4};
-        System.out.println(_4Num(arr));
+
+        for (int i = 1; i <20 ; i++) {
+            System.out.print(fi(i));
+            System.out.print(_01arr(i));
+            System.out.println();
+        }
 
     }
 }

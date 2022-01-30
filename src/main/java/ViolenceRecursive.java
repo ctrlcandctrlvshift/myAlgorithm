@@ -12,9 +12,9 @@ public class ViolenceRecursive {
     //小压大
     //左中右
     //3步骤：
-    //1.1-N-1的圆盘移动到中柱
-    //2.N圆盘移动到右柱
-    //3.1-N-1的圆盘移动到右柱
+    //1.1~N-1的圆盘移动到中柱  from->other
+    //2.N圆盘移动到右柱   from->to(完成)
+    //3.1~N-1的圆盘移动到右柱  other->to
     //ps：不要被左中右柱迷惑了    左中右柱随时可以切换  步骤仍然是这几个
     public static void hanoi(int n){
         if (n>0){
@@ -29,6 +29,11 @@ public class ViolenceRecursive {
             System.out.println(n+"从" + from + "到" + to);
             func_(n-1,other,to,from);
         }
+    }
+
+    public static void main(String[] args) {
+        hanoi(2);
+
     }
 
     //使用递归把栈逆序
@@ -786,15 +791,5 @@ return dp[0][aim];
 
     }
 
-
-    public static void main(String[] args) {
-        int arr[]={1,1,5,5,7,10,12,12,12,12,12,12,15};
-        int a=3;
-        int b=10;
-        System.out.println(processCoffe(arr, a, b, 0, 0));
-        System.out.println(dpCoffe(arr, a, b));
-
-
-    }
 
 }
