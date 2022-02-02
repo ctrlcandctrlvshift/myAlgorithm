@@ -113,6 +113,8 @@ public class TrieTree {
 
         }
     }
+
+
     public static class Node2{
         public int pass;
         public int end;

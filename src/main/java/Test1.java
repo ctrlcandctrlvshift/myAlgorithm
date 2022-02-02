@@ -1,3 +1,4 @@
+import javax.sound.sampled.DataLine.Info;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -1131,6 +1132,7 @@ return res;
     //套路
     //牛生牛问题  3年可以生牛
     //问几年后有多少牛
+    //去年的牛 加上3年前的牛的数量
     //F（N）=F（N-1）+F（N-3）
     //最大3阶
 
@@ -1199,7 +1201,7 @@ return res;
     //"110"
     //"111"达标。
 
-    //暴力递归（不建议使用）
+    //暴力递归（不建议使用）打表用的
     public static int _01arr(int n){
         if (n<1){
             return 0;
@@ -1238,13 +1240,419 @@ return res;
     //F（N）=F（N-1）+F（N-2）
 
 
-    public static void main(String[] args) {
-
-        for (int i = 1; i <20 ; i++) {
-            System.out.print(fi(i));
-            System.out.print(_01arr(i));
-            System.out.println();
+//在迷迷糊糊的大草原上，小红捡到了n根木棍，第;根木棍的长度为i，
+//小红现在很开心。想选出其中的三根木棍组成美丽的三角形。
+//但是小明想捉弄小红，想去掉一些木棍，使得小红任意选三根木棍都不能组成
+//三角形.
+//请问小明最少去掉多少根木棍呢？
+//给定N，返回至少去掉多少根？(用暴力解未完成)
+    //斐波那契数列  剩余斐波那契数列根  即时去掉最少根
+    //当[i]==[i-1]+[i-2]  永远不可能成三角形
+    public static int clubNum(int n) {
+        if (n < 3) {
+            return 0;
         }
+        int [] arr=new int[n+1];
+        for (int i = 0; i <=n ; i++) {
+            arr[i]=i;
+        }
+       return processClub(n,1,arr);
+
+    }
+    //index
+    public static int processClub(int n,int index,int []arr){
+        if (index>n){
+            return Integer.MAX_VALUE;
+        }
+
+        int min=n-arr.length+1;
+        boolean flag=true;
+        for (int i = 1; i <arr.length-2 ; i++) {
+            for (int j = i+1; j <arr.length-1 ; j++) {
+                for (int k = j+1; k <arr.length ; k++) {
+                    if (arr[i]==-1||arr[j]==-1||arr[k]==-1){
+                        continue;
+                    }
+                    if (isTriangle(i,j,k)){
+                     min=Integer.MAX_VALUE;
+                     flag=false;
+                     break;
+                    }
+                }
+            }
+        }
+        if (flag){
+            return min;
+        }
+
+        //拿index这个数
+
+        int yes=processClub(n,index+1,arr);
+
+        //不拿
+        arr[index]=-1;
+        index--;
+        int no=processClub(n,index,arr);
+
+        return Math.min(no,yes);
+    }
+    public static boolean isTriangle(int a,int b,int c){
+        if (a+b>c&&Math.abs(a-b)<c){
+            return true;
+        }
+        return false;
+    }
+
+
+
+
+//牛牛准备参加学校组织的春游，出发前牛牛准备往背包里装入一些零食，牛牛的背包容
+//量为w
+//牛牛家里一共有n袋零食，第i袋零食体积为v[i]。
+//牛牛想知道在总体积不超过背包容量的情况下，他一共有多少种零食放法(总体积为o也
+//算一种放法）
+    //背包问题
+
+
+
+//为了找到自己满意的工作，牛牛收集了每种工作的难度和报酬。牛牛选工作的标准是在难度不超过自身能力
+//牛牛的小伙伴们来找牛牛帮忙选工作，
+//class Job
+//pub lic int money ://该工作的报酬
+//public int hard;//该工作的难度
+//public Job (int money,
+//int hard)
+//this. money = monev:
+//this. hard = hard:
+//给定-
+//一个Job类型的数组 jobarr， 表示所有的工作。给定一个int类型的数组arr，表示所有小伙伴的能力。
+//返回int类型的数组，表示每一个小伙伴按照牛牛的标准选工作后所能获得的报酬
+    //使用有序表 从小到大 排序好jobs  使用有序表保证工作难度 和金钱是成正比的
+
+    public static class Job{
+        public int hard;
+        public int money;
+
+        public Job(int hard, int money) {
+            this.hard = hard;
+            this.money = money;
+        }
+    }
+    public static class JobComaptor implements Comparator<Job>{
+        @Override
+        public int compare(Job o1, Job o2) {
+            return o1.hard!=o2.hard?(o1.hard-o2.hard):(o2.money-o1.money);
+        }
+    }
+    public static int[] getMoneys(Job[] jobs,int [] ability){
+        Arrays.sort(jobs,new JobComaptor());
+
+        TreeMap<Integer, Integer> map=new TreeMap<>();
+        map.put(jobs[0].hard,jobs[0].money);
+        Job pre=jobs[0];
+        for (int i = 1; i <jobs.length ; i++) {
+            if (pre.hard!=jobs[i].hard&&pre.money<jobs[i].money){
+                pre=jobs[i];
+                map.put(jobs[i].hard,jobs[i].money);
+            }
+        }
+
+        int [] newArray=new int[ability.length];
+        for (int i = 0; i <ability.length ; i++) {
+            Integer key=map.floorKey(ability[i]);
+            newArray[i]=key!=null?map.get(key):0;
+        }
+        return newArray;
+    }
+
+
+    //str 变 int
+    //str 肯定是合法的
+    public static int strToInt(String str){
+         char[] arr=str.toCharArray();
+        boolean neg=arr[0]=='-'?true:false;
+        int minq=Integer.MIN_VALUE/10;
+        int minr=Integer.MIN_VALUE%10;
+        int res=0;
+        int cur=0;
+        for (int i = neg?1:0; i <arr.length ; i++) {
+            //改成负数 因为负数比正数多1
+            cur='0'-arr[i];
+            //防止溢出
+            //举个例子就好懂了
+            if ((res<minq)||(res==minq&&cur<minr)){
+                throw new RuntimeException("bu neng zhuang");
+            }
+            res=res*10+cur;
+
+        }
+        //正数  且到系统负数最小值  那么正数必越界
+        if (!neg&&res==Integer.MIN_VALUE){
+            throw new RuntimeException("bu neng zhuang");
+        }
+        return neg?-res:res;
+    }
+
+
+
+    //前缀树
+    //给你一个字符串类型的数组arr，譬如：
+    //String D arr = 1
+    //"b\\cst"
+    //"d\\”
+    //"a\\d\\e"
+    //"a\\b\\e"
+    //你把这些路径中蕴含的目录结构给画出来，子目录直接列在父目录下面，并比父目录
+    //向右进两格，就像这样：
+    //a
+    //   b
+    //     C
+    //   d
+    //     e
+    //b
+    //   cst
+    //d
+    //同一级的需要按字母顺序排列，不能乱。
+
+    public static class TrieNode{
+        String name;
+        TreeMap<String,TrieNode> map;
+
+        public TrieNode(String name) {
+            this.name = name;
+            this.map = new TreeMap<>();
+        }
+    }
+
+    public static TrieNode generateFolderTree(String []folderPaths){
+        TrieNode head=new TrieNode("");
+        for (String folderPath:folderPaths){
+            String []path=folderPath.split("\\\\");
+            TrieNode cur=head;
+            for (int i = 0; i <path.length ; i++) {
+                if (!cur.map.containsKey(path[i])){
+                    cur.map.put(path[i],new TrieNode(path[i]));
+                }
+                cur=cur.map.get(path[i]);
+            }
+        }
+        return head;
+    }
+
+    //深度优先遍历
+    public static void processPrint(TrieNode node,int level){
+        if (node==null){
+            return;
+        }
+        System.out.println(getSpace(level) + node.name);
+        for (TrieNode next:node.map.values()){
+            processPrint(next,level+1);
+        }
+
+    }
+
+    public static String getSpace(int level){
+        String s="";
+        for (int i = 1; i <level ; i++) {
+            s+=" ";
+        }
+        return s;
+    }
+
+    public static void start(String []folderPaths){
+        if (folderPaths==null||folderPaths.length==0){
+            return;
+        }
+        TrieNode head=generateFolderTree(folderPaths);
+        processPrint(head,1);
+    }
+
+    //搜索二叉树转有序双向链表
+    //二叉树套路
+    public static class NodeD{
+        NodeD left;
+        NodeD right;
+        int value;
+
+        public NodeD(int value) {
+            this.value = value;
+            left=null;
+            right=null;
+        }
+    }
+    public static class Info1{
+        NodeD start;
+        NodeD end;
+
+        public Info1(NodeD start, NodeD end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
+    public static NodeD treeToLink(NodeD head){
+        if (head==null){
+            return null;
+        }
+        Info1 info1=process(head);
+        return info1.start;
+    }
+    public static Info1 process(NodeD node){
+        if (node==null){
+            return null;
+        }
+        Info1 left=process(node.left);
+        Info1 right=process(node.right);
+
+        if(left!=null){
+            left.end.right=node;
+            node.left=left.end;
+        }
+        if (right!=null){
+            right.start.left=node;
+            node.right=right.start;
+        }
+        return new Info1(left==null?node:left.start,right==null?node:right.end);
+    }
+
+
+    //二叉树中 最大搜索二叉树节点个数
+    public static class Info2{
+        boolean isBST;
+        int ans;
+        int max;
+        int min;
+        public Info2(boolean isBST,int ans, int max, int min) {
+            this.isBST = isBST;
+            this.ans = ans;
+            this.max = max;
+            this.min = min;
+        }
+    }
+    public static int numMaxBSTNode(NodeD head){
+        if (head==null){
+            return 0;
+        }
+        Info2 res=proceessBST(head);
+        return res.ans;
+    }
+    public static Info2 proceessBST(NodeD node){
+        if (node==null){
+            return new Info2(true,0,Integer.MIN_VALUE,Integer.MAX_VALUE);
+        }
+        Info2 left=proceessBST(node.left);
+        Info2 right=proceessBST(node.right);
+
+        if (left.isBST&&right.isBST&&(left.max<node.value&&right.min>node.value)){
+            return new Info2(true,left.ans+right.ans+1,
+                    Math.max(node.value,Math.max(left.max,right.max)),
+                    Math.min(node.value,Math.min(left.min,right.min)));
+        }else {
+            return new Info2(false,Math.max(left.ans,right.ans),Integer.MIN_VALUE,Integer.MIN_VALUE);
+        }
+    }
+
+
+    //为了保证招聘信息的质量问题，公司为每个职位设计了打分系统，打分可以为正数，也
+    //可以为负数，正数表示用户认可帖子质量，负数表示用户不认可帖子质量．打分的分数
+    //根据评价用户的等级大小不定，比如可以为 ：1分，10分，
+    //30分，
+    //-10分等。假设数组A
+    //记录了一条站子所有打分记录，现在需要找出帖子曾经得到过最高的分数是多少，
+    //后续根据最高分数来确认需要对发帖用户做相应的惩罚或奖勋．其中，
+    //最高分的定义为：
+    //用户所有打分记录中，
+    //连续打分数据之和的最大值即认为是贴子曾经获得的最高分。例
+    //如：站子10001010近期的打
+    //分记录为[1,1,-1,-10,11,4,-6,9,20.-10,-2]那么该条帖子曾经到达过的最高分数为
+    //11+4+（-6)+9+20=38。请实现一段代码，输入为帖子近期的打分记录，输出为当前帖子
+    //得到的最高分数。
+
+    //先假设答案再分析
+    //累加和数组最长的
+    //max 有大变大  cur 为负数变0
+    public static int sumMax(int [] arr){
+        if (arr==null||arr.length==0){
+            return 0;
+        }
+        int cur=0;
+        int max=Integer.MIN_VALUE;
+
+        for (int i = 0; i < arr.length; i++) {
+            cur+=arr[i];
+            max=Math.max(max,cur);
+            if (cur<0){
+                cur=0;
+            }
+        }
+        
+        return max;
+    }
+
+    //给定一个整型矩阵  返回子矩阵的最大累加和
+    public static int sumMirtixMax(int [][]mix){
+        if (mix==null||mix.length==0){
+            return 0;
+        }
+        int max=Integer.MAX_VALUE;
+        int cur=0;
+        int []s=null;
+        for (int i = 0; i <mix.length ; i++) {
+            s=new int[mix[i].length];
+            for (int j = i; j <mix[i].length ; j++) {
+                cur=0;
+                for (int k = 0; k <s.length ; k++) {
+                    s[k]+=mix[j][k];
+                    cur+=s[k];
+                    max=Math.max(max,cur);
+                    cur=cur<0?0:cur;
+                }
+            }
+
+        }
+
+
+
+        return max;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public static void main(String[] args) {
+//      NodeD node5=new NodeD(5);
+//        NodeD node2=new NodeD(2);
+//        NodeD node3=new NodeD(3);
+//        NodeD node4=new NodeD(4);
+//        NodeD node6=new NodeD(6);
+//        NodeD node7=new NodeD(7);
+//        NodeD node8=new NodeD(8);
+//
+//        node5.left=node3;
+//        node5.right=node6;
+//        node3.left=node2;
+//        node3.right=node4;
+//        node6.right=node7;
+//        node7.left=node8;
+//
+//
+//        System.out.println(numMaxBSTNode(node5));
+
+        int []arr={1,1,-1,-10,11,4,-6,9,20,-10,-2};
+        System.out.println(sumMax(arr));
+
 
     }
 }
