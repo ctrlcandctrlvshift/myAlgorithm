@@ -213,7 +213,6 @@ public class UnionFind {
             this.to = to;
         }
     }
-
     public static class Graph{
         //点集
         public HashMap<Integer, Node1> nodes;

@@ -96,8 +96,8 @@ public static void process1(char[] str, int index, HashSet<String> ans, String p
     //res是答案
 public static void process2(char [] str, int i, ArrayList<String> res){
         if (i==str.length){
-            res.add(String.valueOf(str));
-        }
+        res.add(String.valueOf(str));
+    }
         //i后面的所有字符都可以交换
     for (int j = i; j <str.length; j++) {
         swap(str,i,j);

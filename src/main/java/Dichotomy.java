@@ -58,7 +58,7 @@ public class Dichotomy {
         {
             return index;
         }
-            while (L>=R) {
+            while (L<=R) {
              mid=L+((R-L)>>1);
              if (arr[mid]>=value){
                  R=mid-1;
