@@ -11,6 +11,31 @@ public class Manacher {
     // 前提要在char的两端加#  o（n^2）
     //返回最大回文串数值
 
+    //给定一个字符串s，返回s中最长的回文子字符串。
+    public static String longestPalindromeDp(String s) {
+        if (s==null||s.length()==0){
+            return null;
+        }
+        boolean dp[][]=new boolean[s.length()][s.length()];
+        int max=1;
+        int left=0;
+        int right=0;
+        for (int end = 0; end <s.length() ; end++) {
+            for (int start = end; start >=0 ; start--) {
+                boolean isOk=s.charAt(start)==s.charAt(end);
+                if (start==end||(end-start==1&&isOk)||(dp[start+1][end-1]&&isOk)){
+                    dp[start][end]=true;
+                    if(end-start+1>max){
+                        left=start;
+                        right=end;
+                        max=end-start+1;
+                    }
+                }
+            }
+        }
+        return s.substring(left,right+1);
+    }
+
     public static int manachar(String s){
         if (s==null||s.length()==0){
             return 0;
@@ -60,16 +85,9 @@ public class Manacher {
     }
 
 
-
-
-
-
     public static void main(String[] args) {
-        String s="112";
-//        String b=String.valueOf(manacharString(a));
-//        System.out.println(b);
-        System.out.println(manachar(s));
-
+        String s="cbbd";
+        System.out.println(longestPalindromeDp(s));
     }
 
 

@@ -107,7 +107,7 @@ return pre;
         //慢指针走一步
         Node slow =head.next;
         Node fast=head.next.next;
-       while (fast.next.next!=null&&fast.next!=null){
+       while (fast.next!=null&&fast.next.next!=null){
            slow=slow.next;
            fast=fast.next.next;
        }

@@ -203,6 +203,32 @@ public class TrieTree {
     //可以使用前缀树解决有关前缀的问题
 
 
+    //trie(发音为“try”)或前缀树是一种树数据结构，用于高效地存储和检索字符串数据集中的键。
+    // 这种数据结构有各种各样的应用，例如自动完成和拼写检查。
+    //实现Trie类:
+    //Trie()初始化Trie对象。
+    //void insert(String word)将字符串插入到trie中。
+    //boolean search(String word)如果字符串单词在trie中(即之前插入过)则返回true，否则返回false。
+    //boolean startsWith(String prefix)如果先前插入的字符串中有该前缀，则返回true，否则返回false。
+
+//    static class Trie {
+//
+//        public Trie() {
+//
+//        }
+//
+//        public void insert(String word) {
+//
+//        }
+//
+//        public boolean search(String word) {
+//
+//        }
+//
+//        public boolean startsWith(String prefix) {
+//
+//        }
+//    }
 
 
 

@@ -2,9 +2,11 @@ import org.omg.CORBA.MARSHAL;
 
 import javax.sound.sampled.DataLine.Info;
 import java.lang.reflect.Array;
+import java.net.ServerSocket;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * @author zhang
@@ -1795,89 +1797,66 @@ return res;
 
 
     //最长递增子序列数n^2
-    public static int increaseNum (int [] arr){
-        if (arr==null||arr.length==0){
-            return 0;
+
+    static int maxSum=0;
+    public static int lengthOfLIS(int[] nums){
+        for (int i = 0; i <nums.length ; i++) {
+            processLengthLIS(nums,i);
         }
-        return processIncreaseNum(arr,0);
+        return maxSum;
+
     }
-    public static int processIncreaseNum(int [] arr,int index){
-        if (index==arr.length){
-            return 0;
+    public static int processLengthLIS(int []nums,int index){
+        if (index==0){
+            maxSum=Math.max(maxSum,1);
+            return 1;
         }
-        int res=0;
-        for (int i = index; i <arr.length ; i++) {
-            if (i==index){
-                res=1;
-                continue;
+        int res=1;
+        for (int i = 0; i <=index ; i++) {
+            if (nums[index]>nums[i]){
+                res=Math.max(processLengthLIS(nums,i)+1,res);
             }
-            res+=arr[i-1]<arr[i]?1:0;
         }
-        int other=processIncreaseNum(arr,index+1);
-        return Math.max(res,other);
+        maxSum=Math.max(maxSum,res);
+        return res;
     }
-    public static int increaseNumDp(int [] arr){
-        if (arr==null||arr.length==0){
-            return 0;
-        }
-       int max=0;
-        int []dp=new int[arr.length+1];
-        for (int index = arr.length; index >=0 ; index--) {
-            int res=0;
-            if (index==arr.length){
-                 dp[arr.length]=0;
-                 continue;
-            }
-            for (int i = index; i <arr.length ; i++) {
-                if (i==index){
-                    res=1;
-                    continue;
+
+    public static int lengthOfLISDp(int[] nums){
+        int []dp=new int[nums.length];
+        dp[0]=1;
+        int max=1;
+        for (int i = 1; i <nums.length ; i++) {
+            int res=1;
+            for (int j = 0; j <=i-1 ; j++) {
+                if (nums[i]>nums[j]){
+                    res=Math.max(dp[j]+1,res);
                 }
-                res+=arr[i-1]<arr[i]?1:0;
             }
-            int other=dp[index+1];
-            dp[index]=res;
-            max=Math.max(res,other);
-
+            dp[i]=res;
+            max=Math.max(dp[i],max);
         }
-//        for (int i = 0; i <dp.length; i++) {
-//            System.out.print(dp[i]);
-//        }
-//        System.out.println();
-        return max;
+return max;
     }
-
-
 
     //最长递增子序列数（logn *n）
-    public static int increaseNumEasy(int []arr){
-        if (arr==null||arr.length==0){
+    public static int increaseNumEasy(int []nums){
+        if (nums==null||nums.length==0){
             return 0;
         }
-        int dp[]=new int[arr.length];
         ArrayList<Integer> end=new ArrayList<>();
         int max=0;
-        for (int i = 0; i <arr.length ; i++) {
-            if (i==0){
-                dp[i]=1;
-                end.add(arr[i]);
-                max=1;
-                continue;
-            }
-            if (arr[i]>end.get(end.size()-1)){
-                dp[i]=end.size()+1;
-                end.add(arr[i]);
+        end.add(nums[0]);
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i]>end.get(end.size()-1)){
+                end.add(nums[i]);
             }else {
-               int index= binarySearchAndChange(end,arr[i]);
-               end.set(index,arr[i]);
-               dp[i]=index+1;
+                //找到代替这个位置的最小数
+                int index=binarySearchAndChange(end,nums[i]);
+                end.set(index,nums[i]);
             }
-            max=Math.max(max,dp[i]);
-
         }
-
-        return max;
-
+        
+        return end.size();
     }
     //大于等于n的最左位置
     public static int binarySearchAndChange(ArrayList<Integer> arr,int n){
@@ -2702,7 +2681,7 @@ return dp[start];
     //paths 【i]==i，则表示 ；城市是首都，
     //一张图里只会有一个首都且图中除首都指向自己之
     //外不会有环。
-    //例如， paths=[9, 1,4,9,0,4,8,9,0,11,
+    //例如， paths=[9, 1,4,9,0,4,8,9,0,1】,
     //由数组表示的图可以知道，城市 1 是首都，所以距离为 0，离首都距离为 1 的城市只有城
     //市 9，离首都距离为 2的城市有城市 0、3和7.
     //离首都距离为3的城市有城市 4和8.
@@ -2722,19 +2701,45 @@ return dp[start];
     //如果 paths 长度为 N，请达到时间复杂度为 。(N，额外空间复杂度为 0(1)
 
 
+    //删除重复区间
+    public static int removeCoveredIntervals(int [][]intervals){
+        if (intervals==null||intervals.length==0){
+            return 0;
+        }
+
+        Arrays.sort(intervals,(a,b)->(a[0]==b[0]?b[1]-a[1]:a[0]-b[0]));
+        return intervals.length-processR(intervals,1,intervals[0][1]);
+
+    }
+    public static int processR(int [][]intervals,int index,int max){
+        if (index==intervals.length){
+            return 0;
+        }
+        int res=0;
+        int t=max>=intervals[index][1]?1:0;
+        max=Math.max(intervals[index][1],max);
+        res=processR(intervals,index+1,max)+t;
+        return res;
+    }
+    //改dp很简单
+
+
+
+
+
+
 
 
     //现有nl+n2种面值的硬币，其中前n1种为普通币，可以取任意枚．后n2种为纪念市
     //每种最多只能取一枚，每种硬币有一个面值，问能用多少种方法拼出m的面值？
-    //0--n1-1  n1--n2-1
+    //0--n1-1
     public static int moneySum(int []arr,int n1,int n2,int m){
         if (arr==null||arr.length==0){
             return 0;
         }
-
-
+        HashSet set=new HashSet();
+        return processMoneySum(arr,n1,n2,m,0,set);
     }
-
     public static int processMoneySum(int []arr,int n1,int n2,int m,int res,HashSet<Integer> set){
         if (res>m){
             return 0;
@@ -2759,15 +2764,724 @@ return dp[start];
     }
 
 
+//给定两个一维int数组A和B.
+//其中：A是长度为m、元素从小到大排好序的有序数组。B是长度为n、元素从小
+//到大排好序的有序数组。希望从A和B数组中，找出最大的k个数宇，要求：使用
+//尽量少的比较次数。
+
+    //1.二分法
+    public static int dichotomy(int []arr,int n){
+        int left=0;
+        int right=arr.length-1;
+        int index=-1;
+        while (left<=right){
+            int mid=(right+left)>>1;
+            if (arr[mid]>=n){
+                right=mid-1;
+                index=mid;
+            }else {
+                left=mid+1;
+            }
+        }
+        return index;
+
+    }
+    public static int findNum(int []arr1,int []arr2,int k){
+        if (arr1.length+arr2.length<k){
+            return -1;
+        }
+        int f=1;
+        int cur=-1;
+        int i=arr1.length>>1;
+        boolean small=true;
+        while (cur != k) {
+                if (f==1){
+                    int other=dichotomy(arr2,arr1[i]);
+                    if (other==-1){
+                        cur=arr2.length+i+1;
+                    }else {
+                        cur=other+i+1;
+                    }
+                    if (cur>k){
+                            if (i-1>=0){
+                                i--;
+                                f=1;
+                                continue;
+                            }
+                        if (other==-1){
+                            i=arr2.length-1;
+                            f=2;
+                            continue;
+                        }
+                            i=other;
+                            f=2;
+                            continue;
+
+                    }else if (cur==k){
+                        break;
+                    }else {
+                        if (i+1<arr1.length){
+                            i++;
+                            f=1;
+                            int ex=dichotomy(arr2,arr1[i])+i+1;
+                            if (ex>k){
+                                i=other;
+                                f=2;
+                            }
+                            continue;
+                        }
+                        i=other;
+                        f=2;
+                        continue;
+                    }
+                }
+                if (f==2){
+                    int other=dichotomy(arr1,arr2[i]);
+                    if (other==-1){
+                        cur=arr1.length+i+1;
+                    }else {
+                        cur=other+i+1;
+                    }
+
+                    if (cur>k){
+                        if (i-1>=0){
+                            i--;
+                            f=2;
+                            continue;
+                        }
+                        if (other==-1){
+                            i=arr2.length-1;
+                            f=1;
+                            continue;
+                        }
+                            i=other;
+                            f=1;
+                    }else if (cur==k){
+                        break;
+                    }else {
+                        if (i+1<arr2.length){
+                            i++;
+                            f=2;
+                            int ex=dichotomy(arr1,arr2[i])+i+1;
+                            if (ex>k){
+                                i=other;
+                                f=1;
+                            }
+                            continue;
+                        }
+                        i=other;
+                        f=1;
+                    }
+
+                }
+        }
+        return f==1?arr1[i]:arr2[i];
+    }
+
+    //优化
+    public static int findNumE(int []arr1,int []arr2,int k){
+        if (arr1==null||arr2==null||k>arr1.length+arr2.length){
+            return -1;
+        }
+        int n1=arr1.length;
+        int n2=arr2.length;
+        int []samller=n1>n2?arr2:arr1;
+        int []bigger=n1>n2?arr1:arr2;
+        int s=samller.length;
+        int b=bigger.length;
+        if (k<=s){
+            int []newN1=new int[k];
+            int []newN2=new int[k];
+            for (int i = 0; i <k ; i++) {
+                newN1[i]=arr1[i];
+                newN2[i]=arr2[i];
+            }
+            return findNumMidUp(newN1,newN2);
+        }
+        if (s<k&&k<=b){
+            int t=k-s-1;
+            if (bigger[t]>samller[samller.length-1]){
+                return bigger[t];
+            }else {
+                t++;
+            }
+            int []newS=new int[s];
+            int []newB=new int[s];
+            for (int i = 0; i <s ; i++) {
+                newS[i]=samller[i];
+            }
+            ArrayList<Integer> tmp=new ArrayList<>();
+            for (int i = t; i <t+s ; i++) {
+                tmp.add(bigger[i]);
+            }
+            for (int i = 0; i <newB.length ; i++) {
+                newB[i]=tmp.get(i);
+            }
+            return findNumMidUp(newS,newB);
+        }
+        if (k>b&&k<(s+b)){
+            int t1=k-b-1;
+            int t2=k-s-1;
+            if (samller[t1]>bigger[b-1]){
+                return samller[t1];
+            }else {
+                t1++;
+            }
+            if (bigger[t2]>samller[s-1]){
+                return bigger[t2];
+            }else {
+                t2++;
+            }
+            int l=s-t1;
+            int []newS=new int[l];
+            int []newB=new int[l];
+            ArrayList<Integer> tmp1=new ArrayList<>();
+            for (int i = t1; i <s; i++) {
+                tmp1.add(samller[i]);
+            }
+            for (int i = 0; i <l ; i++) {
+                newS[i]=tmp1.get(i);
+            }
+            ArrayList<Integer>tmp2 =new ArrayList<>();
+            for (int i = t2; i <t2+l ; i++) {
+                tmp2.add(bigger[i]);
+            }
+            for (int i = 0; i <l ; i++) {
+                newB[i]=tmp2.get(i);
+            }
+            return findNumMidUp(newS,newB);
+        }
+        return -1;
+    }
+    public static int findNumMidUp(int []arr1,int []arr2){
+        if (arr1.length==1){
+            return arr1[0]>arr2[0]?arr1[0]:arr2[0];
+        }
+        return processFind(arr1,arr2,0,arr1.length-1,0,arr2.length-1);
+    }
+    public static int processFind(int []arr1,int []arr2,int s1,int e1,int s2,int e2){
+        if (s1==e1||s2==e2){
+            return arr1[s1]<arr2[s2]?arr1[s1]:arr2[s2];
+        }
+        int m1=(e1-s1)/2+s1;
+        int m2=(e2-s2)/2+s2;
+        int l1=(e1-s1)+1;
+        int res=0;
+        if ((l1&1)==0){
+            if (arr1[m1]==arr2[m2]){
+                return arr1[m1];
+            }else {
+                if (arr1[m1]>arr2[m2]){
+                    res=processFind(arr1,arr2,s1,m1,m2+1,e2);
+                }else {
+                    res=processFind(arr1,arr2,m1+1,e1,s2,m2);
+                }
+            }
+        }else {
+            if (arr1[m1]==arr2[m2]){
+                return arr1[m1];
+            }
+            if (arr1[m1]>arr2[m2]){
+                if (arr2[m2]<arr1[m1-1]){
+                    res=processFind(arr1,arr2,s1,m1-1,m2+1,s2);
+                }else {
+                 return arr2[m2];
+                }
+            }else {
+                if (arr1[m1]<arr2[m2-1]){
+                    res=processFind(arr1,arr2,m1+1,e1,s2,m2-1);
+                }else {
+                    return arr2[m2];
+                }
+            }
+        }
+        return res;
+    }
 
 
-    public static void main(String[] args) {
-        int [] arr={3,2,1,0,4};
-        System.out.println(xorMin(arr));
-        System.out.println(xorMinDp(arr));
-        System.out.println(xorMinDpEasy(arr));
+
+    //n 皇后问题
+    public static int nQueen(int n){
+        if (n<=3){
+            return 0;
+        }
+        int [] m= new int[n];
+        return processQueen(n,0,m);
+
+    }
+    public static int processQueen(int n,int index,int []m){
+        if (index==n){
+            return 1;
+        }
+        int res=0;
+        for (int j = 0; j <n ; j++) {
+            if (isOk(m,index,j)){
+                m[index]=j;
+                res+=processQueen(n,index+1,m);
+            }
+        }
+        return res;
+    }
+    public static boolean isOk(int []m,int i,int j){
+        boolean flag=true;
+        for (int k = 0; k <i ; k++) {
+            if (m[k]==j||Math.abs(i-k)==Math.abs(j-m[k])){
+                return false;
+            }
+        }
+        return true;
+    }
 
 
+//给出一个长度为n的整数数组numSlots和一个长度为2 * numSlots >= n的整数数组numSlots。numSlots的编号从1到numSlots。
+//
+//你必须把所有n个整数放入槽中，使每个槽最多包含两个数字。 给定位置的与和是每个数字与其各自槽号的位与和的和。
+//
+//例如，将数字[1,3]放入槽位1和[4,6]放入槽位2的AND和等于(1 AND 1) + (3 AND 1) + (4 AND 2) + (6 AND 2) = 1 + 1 + 0 + 2 = 4。
+//返回numSlots的nums的最大值和总数。
+    public static int maximumANDSum(int[] nums, int numSlots) {
+        if (nums==null||nums.length==0||numSlots==0){
+            return 0;
+        }
+        int []slots=new int [numSlots+1];
+        return processMaxAND(nums,slots,0,numSlots);
+    }
+    public static int processMaxAND(int [] nums,int [] slots,int index,int slotNum){
+        if (index==nums.length){
+            return 0;
+        }
+        int max=0;
+        for (int i = 1; i <=slotNum ; i++) {
+            if (slots[i]<2){
+                slots[i]++;
+               max=Math.max(max,(nums[index]&i)+processMaxAND(nums,slots,index+1,slotNum));
+               slots[i]--;
+            }
+        }
+        return max;
+    }
+
+    //最慢的
+    public static int maximumANDSumUpdate(int []nums ,int ns){
+        if (nums==null||nums.length==0||ns==0){
+            return 0;
+        }
+        int n=2*ns;
+        return processMaximumANDSumUpdate(nums,n,0,0);
+    }
+    public static int processMaximumANDSumUpdate(int []nums,int ns,int mask,int index){
+        if (index==nums.length){
+            return 0;
+        }
+        int max=0;
+        for (int i = 0; i <ns ; i++) {
+            int slot=(i>>1)+1;
+            if ((mask&(1<<i))==0){
+                max=Math.max(max,(slot&nums[index])+processMaximumANDSumUpdate(nums,ns,mask^(1<<i),index+1));
+            }
+        }
+        return max;
+    }
+
+    public static int maximumANDSumUpdateDp(int []nums ,int ns){
+        if (nums==null||nums.length==0||ns==0){
+            return 0;
+        }
+        Integer[] dp=new Integer[1<<(2*ns)];
+        return processMaximumANDSumUpdateDp(nums,ns*2,0,0,dp);
+    }
+
+    //半dp
+    public static int processMaximumANDSumUpdateDp(int []nums,int ns,int mask,int index,Integer []dp){
+        if (index==nums.length){
+            return 0;
+        }
+        if (dp[mask]!=null){
+            return dp[mask];
+        }
+        int max=0;
+        for (int i = 0; i <ns ; i++) {
+            int slot=(i>>1)+1;
+            if ((mask&(1<<i))==0){
+                max=Math.max(max,(slot&nums[index])+processMaximumANDSumUpdateDp(nums,ns,mask^(1<<i),index+1,dp));
+            }
+        }
+        return dp[mask]=max;
+    }
+
+    public static int maximumANDSumUpdateDp2(int []nums ,int ns) {
+        if (nums == null || nums.length == 0 || ns == 0) {
+            return 0;
+        }
+        int m=nums.length;
+        int n=2*ns;
+        int seleceted=1<<n;
+       int [][]dp=new int[nums.length+1][seleceted];
+        for (int index = m-1; index>=0; index--) {
+            for (int mask = seleceted-1; mask >=0 ; mask--) {
+                for (int i = 0; i <n ; i++) {
+                    int slot=(i>>1)+1;
+                    if ((mask&(1<<i))==0){
+                        dp[index][mask]=Math.max(dp[index][mask],(slot&nums[index])+dp[index+1][mask^(1<<i)]);
+                    }
+                }
+            }
+        }
+        return dp[0][0];
+
+    }
+
+
+
+//给定两个长度为n的整数数组nums1和nums2。
+//
+//两个整数数组的异或和为(nums1[0]异或nums2[0]) + (nums1[1]异或nums2[1]) +… + (nums1[n - 1] XOR nums2[n - 1])(0索引)。
+//
+//例如，[1,2,3]和[3,2,1]的XOR和等于(1 XOR 3) + (2 XOR 2) + (3 XOR 1) = 2 + 0 + 2 = 4。
+//重新排列nums2中的元素，使结果的异或和最小。
+//
+//在重新排列后返回异或和。
+
+    public static int minimumXORSum(int[] nums1, int[] nums2) {
+        if (nums1==null||nums2==null||nums1.length==0){
+            return 0;
+        }
+        int n1=nums1.length;
+        int selected=1<<n1;
+        Integer []dp=new Integer[selected];
+        return processMinimumXORSum(nums1,nums2,0,0,dp);
+    }
+
+    public static int processMinimumXORSum(int []nums1,int []nums2,int mask,int index,Integer [] dp){
+        if(index==nums1.length){
+            return 0;
+        }
+        if (dp[mask]!=null){
+            return dp[mask];
+        }
+        int min=Integer.MAX_VALUE;
+        for (int i = 0; i <nums2.length ; i++) {
+            if ((mask&(1<<i))==0){
+                min=Math.min(min,(nums1[index]^nums2[i])+processMinimumXORSum(nums1,nums2,mask^(1<<i),index+1,dp));
+            }
+        }
+        return dp[mask]=min;
+
+    }
+    //给定一个0索引的二进制字符串s，它表示一个火车车厢序列。 S [i] = '0'表示第i辆车不含非法货物，S [i] = '1'表示第i辆车不含非法货物。
+    //
+    //作为列车长，你希望清除所有载有非法货物的车厢。 你可以任意次数地执行以下三种操作:
+    //
+    //从左端移除一节火车车厢(即移除s[0])，这需要1个单位的时间。
+    //从右端卸下火车车厢。 长度- 1])，需要1个单位的时间。
+    //从序列中的任何地方移除一节火车车厢，这需要2个单位的时间。
+    //退回所有载有非法货物的车辆的最短时间。
+    //
+    //请注意，一个空的汽车序列被认为没有载有非法货物的汽车。
+
+    public static int minimumTime(String s) {
+        if(s==null){
+            return 0;
+        }
+        char[] path=s.toCharArray();
+        return processMinimumTime(0,path,0);
+    }
+
+
+    public static int processMinimumTime(int index,char[] path,int size){
+        if (index==path.length){
+            return 0;
+        }
+        char cur=path[index];
+        int min=0;
+        if (cur=='0'){
+            min=processMinimumTime(index+1,path,size+1);
+        }else {
+            int p1=processMinimumTime(index+1,path,0)+size+1;
+            int p2=processMinimumTime(index+1,path,size)+2;
+            int p3=path.length-index;
+            min=Math.min(Math.min(p1,p2),p3);
+        }
+        return min;
+    }
+
+    public static int minimumTimeDp(String s){
+        if(s==null){
+            return 0;
+        }
+        char[] path=s.toCharArray();
+        int [][]dp=new int[path.length+1][path.length+1];
+        for (int index = path.length-1; index >=0 ; index--) {
+            for (int size=path.length-1; size>=0;size--){
+                char cur=path[index];
+                int min=0;
+                if (cur=='0'){
+                    min=dp[index+1][size+1];
+                }else {
+                    int p1=dp[index+1][0]+size+1;
+                    int p2=dp[index+1][size]+2;
+                    int p3=path.length-index;
+                    min=Math.min(Math.min(p1,p2),p3);
+                }
+             dp[index][size]=min;
+            }
+            
+        }
+        return dp[0][0];
+    }
+    public static int  minimumTimeGreedy(String s){
+        if(s==null){
+            return 0;
+        }
+        int n=s.length();
+        int res=n;
+        int left=0;
+        int size=0;
+        for (int i = 0; i <n ; i++) {
+            if (s.charAt(i)=='1'){
+                left=Math.min(size+1,left+2);
+            }
+            size++;
+            res=Math.min(res,left+n-i-1);
+        }
+        return res;
+    }
+
+    //给出一个二进制数组nums和一个整数k。
+    //k位翻转就是从nums中选择一个长度为k的子数组，同时把子数组中的每一个0都改成1，把子数组中的每一个1都改成0。
+    //返回数组中不存在0所需的最小k位翻转次数。 如果不可能，则返回-1。
+    //子数组是数组的连续部分。
+
+    public static int minKBitFlips(int[] nums, int k){
+        if (nums==null||nums.length<k){
+            return -1;
+        }
+        int res=0;
+        int n=nums.length;
+
+        for (int i = 0; i <n;i++) {
+            if (nums[i]==0) {
+                if (i + k > n) {
+                    return -1;
+                }
+                for (int j = i; j < i + k; j++) {
+                    nums[j] = nums[j] == 1 ? 0 : 1;
+                }
+                res++;
+            }
+        }
+
+        return res;
+    }
+
+    public static int minKBitFlips2(int[] nums, int k){
+        if (nums==null||nums.length<k){
+            return -1;
+        }
+        int res=0;
+        int n=nums.length;
+        int []f=new int[n+1];
+        if (nums[0]==0){
+            f[0]++;
+            f[k]--;
+            res++;
+        }
+        for (int i = 1; i <n;i++) {
+            f[i]+=f[i-1];
+            if (((f[i]&1)==0&&nums[i]==0)||((f[i]&1)!=0&&nums[i]==1)){
+                res++;
+                f[i]++;
+                if (i + k > n) {
+                    return -1;
+                }
+                f[i+k]--;
+            }
+        }
+
+        return res;
+    }
+
+    //你有一个由n个节点标记为0到n - 1的无向连通图。 给定一个数组图，图[i]是一个由节点i通过一条边连接的所有节点组成的列表。
+    //返回访问每个节点的最短路径的长度。 您可以在任何节点开始和停止，可以多次访问节点，也可以重用边。\
+    public static int shortestPathLength(int[][] graph) {
+        if (graph==null||graph.length==0||graph[0].length==0){
+            return 0;
+        }
+        int n=graph.length;
+        int res=Integer.MAX_VALUE;
+        for (int i = 0; i <graph.length ; i++) {
+            res=Math.min(res,processPathLength(graph,i,new int[n],0,new int[n]));
+        }
+        return res-1;
+    }
+
+    public static int processPathLength(int [][]graph,int index,int []m,int count,int []map){
+        int n=graph[index].length;
+        int t=(1<<n)-1;
+        if (count==graph.length){
+            return 0;
+        }
+        if ((m[index]^t)==0){
+            return Integer.MAX_VALUE-2000;
+        }
+
+        int res=Integer.MAX_VALUE;
+        for (int i = 0; i <graph[index].length ; i++) {
+            if ((m[index]&(1<<i))==0){
+                m[index]=m[index]^(1<<i);
+                if (map[index]==0){
+                    count++;
+                }
+                map[index]++;
+                res=Math.min(res,processPathLength(graph,graph[index][i],m,count,map)+1);
+                if (--map[index]==0){
+                    count--;
+                }
+                m[index]=m[index]^(1<<i);
+            }
+        }
+
+        return res;
+
+    }
+
+
+
+
+
+
+    public static int shortestPathLengthDp(int[][] graph) {
+        if (graph==null||graph.length==0||graph[0].length==0){
+            return 0;
+        }
+        int n=graph.length;
+        int res=Integer.MAX_VALUE;
+        for (int i = 0; i <graph.length ; i++) {
+            res=Math.min(res,processPathLengthDp(graph,i,new int [n],0,new int[n],new Integer[n+1][1<<n],new ArrayList()));
+        }
+        return res-1;
+    }
+
+    public static int processPathLengthDp(int [][]graph,int index,int []m,int count,int []map,Integer [][]dp,ArrayList list){
+        int n=graph[index].length;
+        int t=(1<<n)-1;
+        if (count==graph.length){
+            return 0;
+        }
+        if ((m[index]^t)==0){
+            return Integer.MAX_VALUE-2000;
+        }
+        if (dp[index][m[index]]!=null){
+            return dp[index][m[index]];
+        }
+
+        int res=Integer.MAX_VALUE;
+        for (int i = 0; i <graph[index].length ; i++) {
+            if ((m[index]&(1<<i))==0){
+                m[index]=m[index]^(1<<i);
+                if (map[index]==0){
+                    count++;
+                }
+                map[index]++;
+                list.add(index);
+                res=Math.min(res,processPathLengthDp(graph,graph[index][i],m,count,map,dp,list)+1);
+                dp[index][m[index]]=res;
+                m[index]=m[index]^(1<<i);
+                if (--map[index]==0){
+                    count--;
+                }
+                list.remove(list.size()-1);
+            }
+        }
+        return res;
+
+    }
+
+    //你是个职业抢劫犯，打算抢劫沿街的房屋。 每个房子都有一定数量的钱藏起来，阻止你抢劫的唯一限制就是相邻
+    // 的房子都有安全系统连接，如果相邻的两间房子在同一晚被闯入，它会自动联系警察。
+    //给定一个代表每家的钱的整数数组，在不通知警察的情况下，退还你今晚可以抢劫的最大金额的钱。
+    public static int rob(int[] nums) {
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        return processRob(nums,0);
+    }
+    public static int processRob(int []nums,int index){
+        if(index>=nums.length){
+            return 0;
+        }
+        int p1=processRob(nums,index+1);
+        int p2=processRob(nums,index+2)+nums[index];
+        return Math.max(p1,p2);
+    }
+    public static int robDp(int[] nums) {
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        int N=nums.length;
+        int []dp=new int[N+2];
+        for (int index = N-1; index >=0; index--) {
+            int p1=dp[index+1];
+            int p2=dp[index+2]+nums[index];
+            dp[index]=Math.max(p1,p2);
+        }
+        return dp[0];
+
+    }
+    //你是个职业抢劫犯，打算抢劫沿街的房屋。 每户人家都藏了一定数量的钱。 这里所有的房子都围成一圈。
+    // 这意味着第一个房子是最后一个房子的邻居。 与此同时，相邻的住宅都安装了安保系统，
+    // 如果在同一晚，相邻的两间住宅被闯入，安保系统就会自动报警。
+    //给定一个代表每家的钱的整数数组，在不通知警察的情况下，退还你今晚可以抢劫的最大金额的钱。
+    //给定一个代表每家的钱的整数数组，在不通知警察的情况下，退还你今晚可以抢劫的最大金额的钱。
+    public static int rob2(int[] nums) {
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        return processRob2(nums,0,false);
+    }
+    public static int processRob2(int []nums,int index,boolean isOne){
+        if (index>=nums.length){
+            return 0;
+        }
+        if (isOne&&index==nums.length-1){
+           return 0;
+        }
+        int p1=processRob2(nums,index+1,isOne?true:false);
+        int p2=processRob2(nums,index+2,index==0||isOne?true:false)+nums[index];
+        return Math.max(p1,p2);
+    }
+
+    public static int rob2Dp(int[] nums) {
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        int N=nums.length;
+        int []f=new int[N+2];
+        int []t=new int[N+2];
+        for (int index = N-1; index >=0 ; index--) {
+            int f1,f2,t1,t2;
+            if (index==0){
+                f[index]=f[index+1];
+                t[index]=t[index+2]+nums[index];
+                continue;
+            }
+            if (index==N-1){
+                t[index]=t[index+1];
+                f[index]=f[index+2]+nums[index];
+                continue;
+            }
+
+            f1=f[index+1];
+            f2=f[index+2]+nums[index];
+            f[index]=Math.max(f1,f2);
+
+            t1=t[index+1];
+            t2=t[index+2]+nums[index];
+            t[index]=Math.max(t1,t2);
+
+        }
+        
+        return Math.max(t[0],f[0]);
     }
 
 
@@ -2784,8 +3498,1053 @@ return dp[start];
 
 
 
+    //你得到一个价格数组，其中价格[i]是给定股票在第i天的价格。
+    //你想让你的利润最大化找1天去买股票 找不同的1天去卖股票
+    //退还您能从这笔交易中获得的最大利润。 如果你不能获得任何利润，返回0。
+    public static int maxProfit(int[] prices) {
+        if (prices==null||prices.length==0){
+            return 0;
+        }
+        int max=0;
+        int cur=prices[0];
+        for (int i = 0; i <prices.length ; i++) {
+            if (cur>=prices[i]){
+               cur= prices[i];
+            }else {
+                max=Math.max(max,prices[i]-cur);
+            }
+        }
+        return max;
+    }
+
+    //你得到一个整数数组价格，其中价格[i]是给定股票第i天的价格。
+    //在每一天，你可以决定购买和/或出售股票。 任何时候你最多只能持有该股票的一股。 不过，你也可以在买入当日立即卖出。
+    //找到并回报你能达到的最大利润。
+    public static int maxProfit2(int[] prices) {
+        if (prices==null||prices.length==0){
+            return 0;
+        }
+        int max=0;
+        int cur=prices[0];
+        for (int i = 0; i <prices.length ; i++) {
+            if(cur>=prices[i]){
+                cur=prices[i];
+            }else {
+                max+=prices[i]-cur;
+                cur=prices[i];
+            }
+        }
+        return max;
+    }
+    //你得到一个价格数组，其中价格[i]是给定股票在第i天的价格。
+    //找到你能获得的最大利润。 您最多可完成两笔交易。
+    //注意:你不能同时进行多笔交易(即，你必须在再次买入之前卖出股票)。
+
+    public static int maxProfits3vr(int []prices){
+        if (prices==null||prices.length==0){
+            return 0;
+        }
+
+        int max=Integer.MIN_VALUE;
+        for (int i = 0; i <prices.length ; i++) {
+            int p1=Integer.MIN_VALUE;
+            for (int j = 0; j <=i ; j++) {
+                p1=Math.max(p1,prices[i]-prices[j]);
+            }
+            max=Math.max(max,p1+processMaxProfits1(prices,i,i+1));
+        }
+        return max;
+    }
+    public static int processMaxProfits1(int []prices,int pay1,int pay2){
+        if (pay2>=prices.length){
+            return 0;
+        }
+            int p2=Integer.MIN_VALUE;
+            for (int i = pay1+1; i <=pay2; i++) {
+                 p2=Math.max(p2,prices[pay2]-prices[i]);
+            }
+            return Math.max(p2,processMaxProfits1(prices,pay1,pay2+1));
+    }
+
+    public static int maxProfits3Dp(int []prices){
+        if (prices==null||prices.length==0){
+            return 0;
+        }
+        int max=Integer.MIN_VALUE;
+        int N=prices.length;
+        int [][]dp=new int[N+1][N+1];
+        for (int i = 0; i <prices.length ; i++) {
+            int p1=Integer.MIN_VALUE;
+            for (int j = 0; j <=i ; j++) {
+                p1=Math.max(p1,prices[i]-prices[j]);
+            }
+
+            for (int j = N-1; j >=i+1 ; j--) {
+
+                int p2=Integer.MIN_VALUE;
+                for (int index = i+1; index <=j; index++) {
+                    p2=Math.max(p2,prices[j]-prices[index]);
+                }
+                dp[i][j]=Math.max(p2,dp[i][j+1]);
+
+            }
+            max=Math.max(max,p1+dp[i][i+1]);
+        }
+        return max;
+    }
+
+    public static int maxProfits3vr2(int []prices) {
+        if (prices == null || prices.length == 0) {
+            return 0;
+        }
+       return processMaxProfits2(prices,2,prices.length-1);
+    }
+    //第i笔交易截止第day天的最大值
+    public static int processMaxProfits2(int []prices,int index,int day){
+        if (index<=0){
+            return 0;
+        }
+        if (day<0){
+            return 0;
+        }
+        int max=Integer.MIN_VALUE;
+        for (int i = 0; i <day ; i++) {
+            max=Math.max(max,prices[day]-prices[i]+processMaxProfits2(prices,index-1,i));
+        }
+        max=Math.max(max,processMaxProfits2(prices,index,day-1));
+        return max;
+    }
+
+    public static int maxProfits3Dp2(int []prices){
+        if (prices == null || prices.length == 0) {
+            return 0;
+        }
+
+        int [][]dp=new int[3][prices.length+1];
+
+        for (int i = 1; i <3 ; i++) {
+            for (int j = 1; j <prices.length ; j++) {
+                int max=Integer.MIN_VALUE;
+
+                for (int k = 0; k <=j ; k++) {
+                    max=Math.max(max,prices[j]-prices[k]+dp[i-1][k]);
+                }
+                dp[i][j]=Math.max(max,dp[i][j-1]);
+            }
+        }
+
+        return dp[2][prices.length-1];
+    }
+
+    public static int maxProfits3Dp3(int []prices){
+        if (prices == null || prices.length == 0) {
+            return 0;
+        }
+
+        int [][]dp=new int[3][prices.length+1];
+
+        for (int i = 1; i <3 ; i++) {
+            int maxDiff=dp[i-1][0]-prices[0];
+            for (int j = 1; j <prices.length ; j++) {
+                int max=Integer.MIN_VALUE;
+
+                //max=Math.max(max,prices[j]-prices[k]+dp[i-1][k]);
+                //-prices[k]+dp[i-1][k]+prices[j]
+                //经典 可以常看
+                max=Math.max(max,prices[j]+maxDiff);
+                dp[i][j]=Math.max(max,dp[i][j-1]);
+                maxDiff=Math.max(maxDiff,dp[i-1][j]-prices[j]);
+
+            }
+        }
+
+        return dp[2][prices.length-1];
+    }
+    //给定一个整数数组的价格，其中价格[i]是给定股票第i天的价格，还有一个整数k。
+    //找到你能获得的最大利润。 你最多可以完成k个交易。
+    //注意:你不能同时进行多笔交易(即，你必须在再次买入之前卖出股票)。
+    public static int maxProfits4Dp(int []prices,int k){
+        if (prices == null || prices.length == 0||k==0) {
+            return 0;
+        }
+
+        int [][]dp=new int[k+1][prices.length+1];
+
+        for (int i = 1; i <k+1 ; i++) {
+            int maxDiff=dp[i-1][0]-prices[0];
+            for (int j = 1; j <prices.length ; j++) {
+                int max=Integer.MIN_VALUE;
+
+                //max=Math.max(max,prices[j]-prices[k]+dp[i-1][k]);
+                //-prices[k]+dp[i-1][k]+prices[j]
+                //经典 可以常看
+                max=Math.max(max,prices[j]+maxDiff);
+                dp[i][j]=Math.max(max,dp[i][j-1]);
+                maxDiff=Math.max(maxDiff,dp[i-1][j]-prices[j]);
+
+            }
+        }
+
+        return dp[k][prices.length-1];
+    }
+    //你有n个气球，索引从0到n - 1。 每个气球上都画有一个数字，用数组nums表示。 你被要求炸掉所有的气球。
+    //如果你爆破第i个气球，你将得到nums[i - 1] * nums[i] * nums[i + 1]硬币。 如果i - 1或i + 1超出了数组的范围，
+    // 则将其视为一个画有1的气球。
+    //退还你可以收集的最大的气球爆破硬币。
+    public static int maxCoins(int[] nums) {
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        LinkedList list=new LinkedList();
+        for (int i = 0; i <nums.length; i++) {
+            list.add(nums[i]);
+        }
+        return processCoins(nums,list);
+    }
+    public static int processCoins(int []nums,LinkedList<Integer> list){
+        if (list.size()==0){
+            return 0;
+        }
+        int max=Integer.MIN_VALUE;
+     //   LinkedList tmp=new LinkedList(list);
+        for (int i = 0; i <list.size() ; i++) {
+            LinkedList tmp=new LinkedList(list);
+            int left=i-1<0?1:list.get(i-1);
+            int right=i+1>=list.size()?1:list.get(i+1);
+            int ans=left*list.get(i)*right;
+            list.remove(i);
+            max=Math.max(max,processCoins(nums,list)+ans);
+            list=tmp;
+        }
+
+        return max;
+    }
+    public static int maxCoins2(int[] nums) {
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        return processConins2(nums,0,nums.length-1);
+
+    }
+    public static int processConins2(int []nums,int left,int right){
+        if (right<0||left>=nums.length){
+            return 0;
+        }
+        int max=0;
+        for (int i = left; i <=right ; i++) {
+            int l=processConins2(nums,left,i-1);
+            int r=processConins2(nums,i+1,right);
+            int ans=(left==0?1:nums[left-1])*nums[i]*(right==nums.length-1?1:nums[right+1]);
+            max=Math.max(max,l+r+ans);
+        }
+        return max;
+    }
+    public static int maxCoinsDp(int [] nums){
+        if (nums==null||nums.length==0){
+            return 0;
+        }
+        int N=nums.length;
+        int [][]dp=new int[N][N];
+        for (int left =N-1; left >=0 ; left--) {
+            for (int right = 0; right <N ; right++) {
+                if (right<0||left>=nums.length){
+                    continue;
+                }
+                for (int i = left; i <=right ; i++) {
+                    int l=i-1<0?0:dp[left][i-1];
+                    int r=i+1>=N?0:dp[i+1][right];
+                    int ans=(left==0?1:nums[left-1])*nums[i]*(right==nums.length-1?1:nums[right+1]);
+                   dp[left][right]=Math.max(dp[left][right],l+r+ans);
+                }
+            }
+        }
+        return dp[0][N-1];
+    }
+
+
+    //给定一个输入字符串s和一个模式p，实现支持'的正则表达式匹配'.'和'*'，其中:
+//“。” 匹配任意单个字符。
+//"*"匹配前面的0个或多个元素。
+//匹配应该覆盖整个输入字符串(而不是部分)
+    public static  boolean isMatch(String s, String p) {
+        if (s==null||s.length()==0||p==null||p.length()==0||p.charAt(0)=='*'){
+            return false;
+        }
+        return processIsMatch(s,p,0,0);
+    }
+
+    //有* 出现两种分支 一种是不拿 因为*可以为0 另一种是拿
+    public static boolean processIsMatch (String s,String p,int s1,int p1){
+         if (p1>=p.length()){
+             return s1==s.length();
+         }
+         boolean ans;
+         boolean cur=s1<s.length()&&(s.charAt(s1)==p.charAt(p1)||p.charAt(p1)=='.');
+         if (p1+1<p.length()&&p.charAt(p1+1)=='*'){
+             ans= processIsMatch(s,p,s1,p1+2)||(cur&&processIsMatch(s,p,s1+1,p1));
+         }else {
+             ans= cur&&processIsMatch(s,p,s1+1,p1+1);
+         }
+         return ans;
+
+    }
+    //改dp非常简单暂不做
+
+
+    ///给定一个正整数数组bean，其中每个整数表示在特定魔术包中找到的魔术豆的数量。
+    //从每个袋子中删除任意数量的豆子(可能没有)，这样每个剩下的非空袋子(仍然包含
+    // 至少一个豆子)中的豆子数量就相等。 一旦豆子从袋子里取出，你就不能把它放回任何袋子里。
+    //prefix
+    //返回您必须移除的魔豆的最小数量。
+    public static long minimumRemoval(int[] beans) {
+        if (beans==null||beans.length==0){
+            return 0;
+        }
+        return processMinmunR(beans,0);
+    }
+    public static long processMinmunR(int [] beans,int index){
+        if (index==beans.length){
+            return Integer.MAX_VALUE;
+        }
+
+        long cur=beans[index];
+        long min=0;
+        for (int i = 0; i <beans.length ; i++) {
+            if (i!=index){
+                min+=beans[i]<cur?beans[i]:beans[i]-cur;
+            }
+        }
+        return Math.min(min,processMinmunR(beans,index+1));
+    }
+
+    public static long minimumRemovalDp(int[] beans) {
+        if (beans==null||beans.length==0){
+            return 0;
+        }
+        int N=beans.length;
+        long []dp=new long[N+1];
+        dp[N]=Integer.MAX_VALUE;
+        for (int index = N-1; index >=0 ; index--) {
+            long cur=beans[index];
+            for (int i = 0; i <beans.length ; i++) {
+                if (i!=index){
+                    dp[index]+=beans[i]<cur?beans[i]:beans[i]-cur;
+                }
+            }
+             dp[index]=Math.min(dp[index],dp[index+1]);
+        }
+        return dp[0];
+    }
+    public static long minimumRemovalG(int[] beans) {
+        if (beans==null||beans.length==0){
+            return 0;
+        }
+        Arrays.sort(beans);
+        long sum=0;
+        long prefix=0;
+        long suffix=0;
+        long min=Long.MAX_VALUE;
+        int N=beans.length;
+        long ans=0;
+
+        for (int i = 0; i <beans.length ; i++) {
+            sum+=beans[i];
+        }
+        for (int i = 0; i <beans.length ; i++) {
+            prefix+=beans[i];
+            suffix=sum-prefix;
+            ans=(prefix-beans[i])+(suffix-beans[i]*(N-i-1L));
+            min=Math.min(min,ans);
+        }
+
+        return min;
+
+    }
+
+    //编写一个程序来解决数独谜题，填满空的单元格。
+    //一个数独解决方案必须满足以下所有规则:
+    //每个数字1-9必须在每行中恰好出现一次。
+    //每个数字1-9必须在每一列中恰好出现一次。
+    //每个数字1-9必须在网格的9个3x3子框中恰好出现一次。
+    //”。字符表示空单元格。
+    public static void solveSudoku(char[][] board) {
+        char[][]ans=new char[board.length][board[0].length];
+       ans= processSudoku(board,0,0);
+        for (int i = 0; i <board.length ; i++) {
+            for (int j = 0; j <board[0].length ; j++) {
+                System.out.print(ans[i][j]);
+            }
+            System.out.println();
+        }
+        System.out.println(isValidSudoku(ans));
+
+    }
 
 
 
+    public static char[][] processSudoku(char[][] board,int r,int c){
+        if (r==board.length){
+            return board;
+        }
+        int newr=0;
+        int newc=0;
+        if (c==board[0].length-1){
+            newc=0;
+            newr=r+1;
+        }else {
+            newr=r;
+            newc=c+1;
+        }
+        char[][]ans=board;
+        if (board[r][c]!='.'){
+            ans=processSudoku(board,newr,newc);
+            if (isFinsh(ans)){
+                return ans;
+            }
+        }else {
+            for (int i = 1; i <=9 ; i++) {
+                char cur=(char)(i+'0');
+                if (isValid(board,r,c,cur)){
+                    board[r][c]=cur;
+                    ans=processSudoku(board,newr,newc);
+                    if (isFinsh(ans)){
+                        return ans;
+                    }
+                    board[r][c]='.';
+                }
+
+            }
+
+        }
+        return ans;
+    }
+    public static boolean isValid(char [][] board,int r,int c,char cur){
+        boolean p1=isRows(board,r,0,cur,c);
+        boolean p2=isCols(board,0,c,cur,r);
+        int limitr,limitc,r1,c1;
+        if (c>=0&&c<=2){
+            limitc=2;
+            c1=0;
+        }else if (c>=3&&c<=5){
+            limitc=5;
+            c1=3;
+        }else {
+            limitc=8;
+            c1=6;
+        }
+        if (r>=0&&r<=2){
+            limitr=2;
+            r1=0;
+        }else if (r>=3&&r<=5){
+            limitr=5;
+            r1=3;
+        }else {
+            limitr=8;
+            r1=6;
+        }
+        boolean p3=isBox(board,r1,c1,r,c,cur,limitr,limitc);
+        if (!p1||!p2||!p3){
+            return false;
+        }
+        return true;
+
+    }
+    public static boolean isFinsh(char[][]board){
+        for (int i = 0; i <board.length ; i++) {
+            for (int j = 0; j <board[0].length ; j++) {
+                if (board[i][j]=='.'){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    //确定9 × 9数独板是否有效。只对已填满的单元格进行验证，验证规则如下:
+    //每行必须包含数字1-9，不能重复。
+    //每一列必须包含数字1-9，不能重复。
+    //网格的9个3 × 3子盒中的每一个必须包含数字1-9，不能重复。
+    public static boolean isValidSudoku(char[][] board) {
+        for (int r = 0; r <board.length ; r++) {
+            for (int c = 0; c <board[0].length ; c++) {
+                char cur=board[r][c];
+                if (cur!='.'){
+                    boolean p1=isRows(board,r,c,cur,c);
+                    boolean p2=isCols(board,r,c,cur,r);
+                    int limitr,limitc,r1,c1;
+                    if (c>=0&&c<=2){
+                        limitc=2;
+                        c1=0;
+                    }else if (c>=3&&c<=5){
+                        limitc=5;
+                        c1=3;
+                    }else {
+                        limitc=8;
+                        c1=6;
+                    }
+                    if (r>=0&&r<=2){
+                        limitr=2;
+                        r1=0;
+                    }else if (r>=3&&r<=5){
+                        limitr=5;
+                        r1=3;
+                    }else {
+                        limitr=8;
+                        r1=6;
+                    }
+                    boolean p3=isBox(board,r1,c1,r,c,cur,limitr,limitc);
+                    if (!p1||!p2||!p3){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    public static boolean isRows(char[][]board,int r,int c,char q,int index){
+        if (c==board[0].length){
+            return true;
+        }
+        char cur=board[r][c];
+        boolean p1=true;
+        if (cur!='.'){
+            if (index!=c&&cur==q){
+                return false;
+            }else {
+             p1=isRows(board,r,c+1,q,index);
+            }
+        }else {
+            p1=isRows(board,r,c+1,q,index);
+        }
+        return p1;
+    }
+    public static boolean isCols(char[][]board,int r,int c,char q,int index){
+        if (r==board.length){
+            return true;
+        }
+        char cur=board[r][c];
+        boolean p1=true;
+        if (cur!='.'){
+            if (index!=r&&cur==q){
+                return false;
+            }else {
+             p1=isCols(board,r+1,c,q,index);
+            }
+        }else {
+            p1=isCols(board,r+1,c,q,index);
+        }
+        return p1;
+    }
+    public static boolean isBox(char[][]board,int r,int c,int rc,int cc,char q,int limitRe,int limitCe){
+        if (r>limitRe){
+            return true;
+        }
+        if (c>limitCe){
+            return true;
+        }
+        boolean p1=true,p2=true;
+        char cur=board[r][c];
+        if (cur!='.'){
+            if (cur==q&&r!=rc&&c!=cc){
+                return false;
+            }else{
+                p1=isBox(board,r+1,c,rc,cc,q,limitRe,limitCe);
+                p2=isBox(board,r,c+1,rc,cc,q,limitRe,limitCe);
+            }
+        }else {
+            p1=isBox(board,r+1,c,rc,cc,q,limitRe,limitCe);
+            p2=isBox(board,r,c+1,rc,cc,q,limitRe,limitCe);
+        }
+        return p1&&p2;
+    }
+
+
+
+
+//Given a sorted array of distinct integers and a target value,
+// return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+//You must write an algorithm with O(log n) runtime complexity.
+    public int searchInsert(int[] nums, int target) {
+        int pre=-1;
+        for (int i = 0; i <nums.length ; i++) {
+            if (nums[i]<target){
+                pre=i;
+            }else if (nums[i]==target){
+                return i;
+            }else {
+                return pre==0?0:pre+1;
+            }
+        }
+        return nums.length;
+    }
+
+    //给定一个m x n的整数数组网格，其中网格[i][j]可能是:1表示起始方块。只有一个起点。2代表结束方块。
+    // 只有一个方尾。0表示空的方块，我们可以走过去。
+    // -1代表我们无法跨越的障碍。返回从开始方块到结束方块的4个方向行走的次数，即通过每个非障碍方块的次数。
+    public static int uniquePathsIII(int[][] grid) {
+
+return 0;
+    }
+    //count-and-say序列是由递归公式定义的数字字符串序列:countAndSay(1) = "1" countAndSay(n)是你“说”来自countAndSay(n-1)的数字字符串的方式，然后转换成一个不同的数字字符串。要确定如何“说”一个数字字符串，请将其分割为最小数量的组，以便每个组都是包含相同字符的连续部分。
+    // 然后对每一组，说出字符的数量，然后说出字符。要将语句转换为数字字符串，请将计数替换为数字并连接每个语句。
+    public static String countAndSay(int n) {
+        return processCAS(n,1,"1");
+    }
+    public static String processCAS(int n,int index,String s){
+        if (index==n){
+            return s;
+        }
+        String newS=s;
+        int cur=0;
+        int count=0;
+        boolean more=false;
+        for (int i = 0; i <s.length() ; i++) {
+            count++;
+            if (i+1==s.length()){
+                if (more){
+                    newS+=String.valueOf(count)+s.charAt(cur);
+                }else {
+                    newS=String.valueOf(count)+s.charAt(cur);
+                }
+                continue;
+            }
+            if (i+1<s.length()&&s.charAt(cur)==s.charAt(i+1)){
+                 if (i==s.length()-1){
+                     newS=String.valueOf(count)+s.charAt(cur);
+                 }
+            }else {
+                if (more){
+                    newS+=String.valueOf(count)+s.charAt(cur);
+                    cur=i+1;
+                    count=0;
+                }else {
+                    newS=String.valueOf(count)+s.charAt(cur);
+                    cur=i+1;
+                    count=0;
+                    more=true;
+                }
+
+
+            }
+        }
+        return processCAS(n,index+1,newS);
+    }
+
+    //给定一个由不同的候选整数和一个目标整数组成的数组，返回所有候选整数的唯一组合的列表，其中所选的数字和到目标。
+    // 您可以以任何顺序返回组合。
+    //同样的数字可以从候选人中选择无限次。如果所选数字中至少有一个的频率不同，那么这两个组合就是唯一的。
+    //对于给定的输入，保证目标的唯一组合的总数小于150个组合。
+
+    public static List<List<Integer>> combinationSum(int[] candidates, int target) {
+        return processComb(candidates,0,target,0,new ArrayList<Integer>(),new ArrayList<List<Integer>>());
+    }
+    public static List<List<Integer>> processComb(int [] candidates,int index,int target,int sum,ArrayList<Integer> list,List<List<Integer>> lists ){
+        if (index>=candidates.length){
+            if (sum==target){
+                lists.add(new ArrayList<>(list));
+                return lists;
+            }else {
+                return lists;
+            }
+
+        }
+        if (sum==target){
+            lists.add(new ArrayList<>(list));
+            return lists;
+        }
+        if (sum>target){
+            return lists;
+        }
+
+        if (sum<target){
+            list.add(candidates[index]);
+            lists=processComb(candidates,index,target,sum+candidates[index],list,lists);
+            list.remove(list.size()-1);
+        }
+
+        lists=processComb(candidates,index+1,target,sum,list,lists);
+        return lists;
+    }
+
+
+    public static List<List<Integer>> combinationSumDfs(int[] candidates, int target) {
+        return processCombDfs(candidates,target,0,new ArrayList<Integer>(),new ArrayList<List<Integer>>(),0);
+    }
+
+    public static List<List<Integer>> processCombDfs(int [] candidates,int target,
+                                                     int sum,ArrayList<Integer> list,List<List<Integer>> lists,int index ){
+        if (sum==target){
+                lists.add(new ArrayList<>(list));
+            return lists;
+        }
+        if (sum>target){
+            return lists;
+        }
+
+        for (int i =index ; i <candidates.length ; i++) {
+            list.add(candidates[i]);
+            lists=processCombDfs(candidates,target,sum+candidates[i],list,lists,i);
+            list.remove(list.size()-1);
+        }
+        return lists;
+    }
+
+//给定一个候选数(candidate)和一个目标数(target)的集合，找出所有候选数和为目标数的唯一组合。
+//候选人中的每个数字只能在组合中使用一次。
+//注意:解集不能包含重复的组合。
+    public static List<List<Integer>> combinationSumDfs2(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        return processCombDfs2(candidates,target,0,new ArrayList<Integer>(),new ArrayList<List<Integer>>(),0);
+    }
+    public static List<List<Integer>> processCombDfs2(int [] candidates,int target,
+                                                     int sum,ArrayList<Integer> list,List<List<Integer>> lists,int index ){
+        if (sum==target){
+            lists.add(new ArrayList<>(list));
+            return lists;
+        }
+        if (sum>target){
+            return lists;
+        }
+
+        for (int i =index ; i <candidates.length ; i++) {
+
+            if (i>index&&candidates[i]==candidates[i-1]){
+                continue;
+            }
+
+            list.add(candidates[i]);
+            lists=processCombDfs2(candidates,target,sum+candidates[i],list,lists,i+1);
+            list.remove(list.size()-1);
+        }
+        return lists;
+    }
+
+//    给定一个未排序的整数数组nums，返回缺失的最小正整数。
+//    你必须实现一个在O(n)时间内运行并且使用常量的额外空间的算法。
+public static int firstMissingPositive(int[] nums) {
+    for (int i = 0; i <nums.length;) {
+        if (nums[i]>0&&nums[i]<nums.length&&i+1!=nums[i]&&nums[nums[i]-1]!=nums[i]){
+            int temp=nums[i];
+            nums[i]=nums[temp-1];
+            nums[temp-1]=temp;
+        }else {
+         i++;
+        }
+    }
+    for (int i = 0; i <nums.length ; i++) {
+        if (nums[i]!=i+1){
+            return i+1;
+        }
+    }
+
+return nums.length+1;
+}
+//给定两个0索引的整数数组服务器和任务，长度分别为n和m。 服务器[i]是第i个服务器的权重，任务[j]是处理第j个任务所需的时间，单位是秒。
+//任务通过任务队列分配给服务器。 最初，所有服务器都是空闲的，队列是空的。
+//在第二个j, j任务是插入到队列(从第0个任务被插入到第二0)。只要有免费的服务器和队列非空,队列的前面的任务将被分配给
+// 一个空闲的服务器与最小的权重,和一条领带,是分配给一个免费的服务器与最小的指数。
+//如果没有空闲的服务器，队列也不是空的，我们会等待服务器空闲，然后立即分配下一个任务。 如果多个服务器同时空闲，那
+// 么队列中的多个任务将按照上面的权重和索引优先级的插入顺序分配。
+//在第t秒被分配任务j的服务器将在第t +任务秒再次空闲[j]。
+//构建一个长度为m的数组ans，其中ans[j]是第j个任务要分配给的服务器的索引。
+//返回数组ans。
+    public static class server{
+        int index;
+        int val;
+
+    public server(int index, int val) {
+        this.index = index;
+        this.val = val;
+    }
+}
+
+public static class assign{
+        server server;
+        int freetime;
+
+    public assign(Test1.server server, int freetime) {
+        this.server = server;
+        this.freetime = freetime;
+    }
+}
+    public static int[] assignTasks(int[] servers, int[] tasks) {
+        PriorityQueue <server> freeServer=new PriorityQueue<server>((a,b)->a.val!=b.val?a.val-b.val:a.index-b.index);
+        PriorityQueue<assign> runServer=new PriorityQueue<assign>((Comparator.comparingInt(a -> a.freetime)));
+        for (int i = 0; i <servers.length ; i++) {
+            freeServer.add(new server(i,servers[i]));
+        }
+        int time=0;
+        int k=0;
+        int [] ans=new int[tasks.length];
+        while (k<tasks.length){
+            while (!runServer.isEmpty()&&runServer.peek().freetime<=time){
+                freeServer.add(runServer.poll().server);
+            }
+            while (!freeServer.isEmpty()&&k<=time&&k<tasks.length){
+                int taskT=tasks[k];
+                int freeTime=time+taskT;
+                server s=freeServer.poll();
+                ans[k]=s.index;
+                runServer.add(new assign(s,freeTime));
+                ++k;
+            }
+            if (!freeServer.isEmpty()){
+                time++;
+            }else {
+                time=runServer.peek().freetime;
+            }
+
+        }
+        return ans;
+}
+
+//给定一个由k个链表组成的数组，每个链表按升序排序
+//将所有的链表合并成一个排序的链表并返回它。
+public static class ListNode {
+    int val;
+    ListNode next;
+
+    ListNode() {
+    }
+
+    ListNode(int val) {
+        this.val = val;
+    }
+
+    ListNode(int val, ListNode next) {
+        this.val = val;
+        this.next = next;
+    }
+}
+//heap
+    public static ListNode mergeKLists(ListNode[] lists) {
+        if (lists==null||lists.length==0){
+            return null;
+        }
+      PriorityQueue <ListNode> heap=new PriorityQueue<>((a,b)->a.val-b.val);
+        for (int i = 0; i <lists.length ; i++) {
+            if (lists[i]==null){
+                continue;
+            }
+            heap.add(lists[i]);
+        }
+        if (heap.isEmpty()){
+            return null;
+        }
+        ListNode node=heap.poll();
+        if (node.next!=null){
+            heap.add(node.next);
+        }
+
+        ListNode head=new ListNode(node.val);
+        ListNode cur=head;
+        while (!heap.isEmpty()){
+            ListNode node1=heap.poll();
+            if (node1.next!=null){
+                heap.add(node1.next);
+            }
+            ListNode node2=new ListNode(node1.val);
+            cur.next=node2;
+            cur=cur.next;
+
+        }
+        return head;
+    }
+//    给定两个大小分别为m和n的有序数组nums1和nums2，返回这两个有序数组的中值。
+//    总体运行时复杂度应为O(log (m+n))
+    public static double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        return 0;
+    }
+
+//给定一个输入字符串(s)和一个模式(p)，实现通配符模式匹配，支持'? '和'*'，其中:
+//“?” 匹配任意单个字符。
+//*匹配任何字符序列(包括空序列)。
+//匹配应该覆盖整个输入字符串(而不是部分)
+public static boolean isMatch2(String s, String p) {
+        if (s==null||p==null){
+            return false;
+        }
+        return processIsMatch2(s,p,0,0);
+}
+
+public static boolean processIsMatch2(String s,String p,int s1,int p1){
+        if (p1==p.length()){
+            return s1==s.length();
+        }
+        char cur=p.charAt(p1);
+        boolean ans=false;
+
+        if (s1<s.length()&&(cur==s.charAt(s1)||cur=='?')){
+            ans=processIsMatch2(s,p,s1+1,p1+1);
+        }
+        if (s1<s.length()&&cur!=s.charAt(s1)&&cur!='?'&&cur!='*'){
+            ans=false;
+        }
+        if (cur=='*'){
+            boolean t1=processIsMatch2(s,p,s1,p1+1);
+            boolean t2=s1<s.length()?processIsMatch2(s,p,s1+1,p1):false;
+            ans=t1||t2;
+        }
+        return ans;
+}
+    public static boolean isMatch2Dp(String s, String p) {
+        if (s==null||p==null){
+            return false;
+        }
+        int S=s.length();
+        int P=p.length();
+        boolean [][]dp=new boolean[P+1][S+1];
+        for (int p1 = P; p1 >=0 ; p1--) {
+            for (int s1 = S; s1 >=0 ; s1--) {
+                if (p1==p.length()){
+                     dp[p1][s1]=s1==s.length();
+                     continue;
+                }
+                char cur=p.charAt(p1);
+                if (s1<s.length()&&(cur==s.charAt(s1)||cur=='?')){
+                    dp[p1][s1]=dp[p1+1][s1+1];
+                }
+                if (s1<s.length()&&cur!=s.charAt(s1)&&cur!='?'&&cur!='*'){
+                    dp[p1][s1]=false;
+                }
+                if (cur=='*'){
+                    boolean t1=dp[p1+1][s1];
+                    boolean t2=s1<s.length()? dp[p1][s1+1]:false;
+                    dp[p1][s1]=t1||t2;
+                }
+            }
+        }
+        return dp[0][0];
+    }
+
+
+
+
+//twoSum
+    public static int[] twoSum(int[] nums, int target) {
+        HashMap<Integer, Integer> map=new HashMap<>();
+        for (int i = 0; i <nums.length ; i++) {
+            if (map.containsKey(target-nums[i])){
+                return new int[]{map.get(target-nums[i]),i};
+            }
+            map.put(nums[i],i);
+        }
+
+        return null;
+}
+
+
+//给定两个非空链表，表示两个非负整数。数字按倒序存储，每个节点包含一个数字。将两个数字相加
+// ，并以链表的形式返回总和。你可以假设这两个数字不包含任何前导零，除了数字0本身。
+
+    public static ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        return null;
+    }
+//给定一个字符串s，找出不重复字符的最长子字符串的长度。
+    public static int lengthOfLongestSubstring(String s) {
+        if (s==null||s.length()==0){
+            return 0;
+        }
+        HashMap <Character,Integer> map=new HashMap<>();
+        int max=1;
+        int res=0;
+        int near=-1;
+        for (int i = 0; i <s.length() ; i++) {
+            char cur=s.charAt(i);
+            if (map.containsKey(cur)){
+                int index=map.get(cur);
+                int back=0;
+                if (near==-1){
+                    back=index;
+                }else {
+                    back=index>near?index:near;
+                }
+                res=i-back;
+                near=index>near?index:near;
+                max=Math.max(res,max);
+                map.put(cur,i);
+            }else {
+                map.put(cur,i);
+                res++;
+                max=Math.max(res,max);
+            }
+        }
+        return max;
+    }
+    //给定一个长度为n的整数数组。有n条垂线，第i条线的两个端点是(i, 0)和(i，高度[i])。
+    //找出两条与x轴一起构成一个容器的直线，使容器包含最多的水。
+    //返回一个容器可以储存的最大水量。
+    //注意，你不能倾斜容器。
+    public static int maxArea(int[] height) {
+        if (height==null||height.length==0){
+            return 0;
+        }
+        int res=0;
+        for (int i = 0; i <height.length ; i++) {
+            int left=-1;
+            int right=-1;
+            for (int j = 0; j <height.length ; j++) {
+                if (i==j){
+                    continue;
+                }
+                if (height[j]>=height[i]){
+                    if (j<i){
+                        left=left==-1?j:left;
+                    }else {
+                        right=j;
+                    }
+                }
+            }
+            int ansl=left==-1?0:i-left;
+            int ansr=right==-1?0:right-i;
+            int ans=(ansl+ansr)*height[i];
+            res=Math.max(ans,res);
+        }
+        return res;
+    }
+    public static int maxArea2(int[] height) {
+        int max=0;
+        int left=0;
+        int right=height.length-1;
+        while (left<=right){
+            max=Math.max(Math.min(height[left],height[right])*(right-left),max);
+            if (height[left]<height[right]){
+                left++;
+            }else {
+                right--;
+            }
+        }
+return max;
+    }
+    //转化罗马数字
+    public static int romanToInt(String s) {
+        HashMap<Character, Integer> map = new HashMap<Character, Integer>();
+        map.put('I', 1);
+        map.put('V', 5);
+        map.put('X', 10);
+        map.put('L', 50);
+        map.put('C', 100);
+        map.put('D', 500);
+        map.put('M', 1000);
+        map.put('A',0);
+        int res=0;
+        char prev='A';
+        for (char c:s.toCharArray()){
+            if (map.get(prev)<map.get(c)){
+                res+=map.get(c)-2*map.get(prev);
+            }else {
+                res+=map.get(c);
+            }
+            prev=c;
+        }
+        return res;
+    }
+
+
+    public static void main(String[] args) {
+        String s="MCMXCIV";
+        System.out.println(romanToInt(s));
+
+    }
 
 }
