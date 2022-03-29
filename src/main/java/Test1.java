@@ -4540,10 +4540,141 @@ return max;
         return res;
     }
 
+//给定一棵二叉树，找出树中两个给定节点的最低共同祖先(LCA)。
+//根据维基百科对LCA的定义:“在两个节点p和q之间，最低共同祖先被定义为T中同时具有p和q
+//后代的最低节点(在这里，我们允许一个节点是它自己的后代)。”
+    static TreeNode res=new TreeNode(0);
+public static TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+          processLCA(root,p,q);
+        return res;
+}
+public static boolean processLCA(TreeNode cur,TreeNode p,TreeNode q){
+        if (cur==null){
+            return false;
+        }
 
+        boolean ans=cur==p||cur==q?true:false;
+        boolean left=processLCA(cur.left,p,q);
+        boolean right=processLCA(cur.right,p,q);
+        if ((left&&right)||(ans&&left)||(ans&&right)){
+            res=cur;
+        }
+        return left||right||ans;
+}
+
+
+
+    public static class TreeNode {
+      int val;
+      TreeNode left;
+      TreeNode right;
+      TreeNode(int x) { val = x; }
+  }
+
+
+    public static boolean isPalindrome(int x) {
+    if (x<0){
+        return false;
+    }
+    ArrayList list =new ArrayList();
+    while (x/10!=0){
+        list.add(x%10);
+        x=x/10;
+    }
+    list.add(x);
+    int left=0;
+    int right=list.size()-1;
+    while (left<=right){
+        if (list.get(left)!=list.get(right)){
+            return false;
+        }
+        left++;
+        right--;
+    }
+    return true;
+    }
+
+    //一个有效的IP地址由四个由单点分隔的整数组成。每个整数的取值范围为0 ~ 255，且不能有前导零。
+//例如:“0.1.2.201”、“192.168.1.1”为合法IP地址，“0.011.255.245”、“192.168.1.312”、“192.168@1.1”为非法IP地址。
+//给定一个只包含数字的字符串s，返回所有可能的有效IP地址，这些IP地址可以通过在s中插入点来构成。你不允许重新排序或删除s中的任何数字。
+// 你可以以任何顺序返回有效的IP地址。
+    public static List<String> restoreIpAddresses(String s) {
+        if (s==null){
+            return null;
+        }
+        StringBuilder str=new StringBuilder(s);
+        List<String> lists=new ArrayList<>();
+        processAddresses(str,1,3,lists);
+        return lists;
+    }
+
+    public static void processAddresses(StringBuilder str,int index,int rest,List<String> lists){
+        if (rest==0){
+            if (isAddresses(str)){
+                lists.add(new String(str));
+            }
+            return;
+        }
+        if (index>str.length()&&rest>0){
+            return;
+        }
+        for (int i = index; i <str.length() ;i++) {
+            str.insert(i,'.');
+            processAddresses(str,i+2,rest-1,lists);
+            str=str.deleteCharAt(i);
+        }
+    }
+    public static boolean isAddresses(StringBuilder str){
+        ArrayList <Integer> list=new ArrayList<>();
+        for (int i = 0; i <str.length() ; i++) {
+            if (str.charAt(i)=='.'){
+               list.add(i);
+            }
+        }
+
+        String s1= str.substring(0,list.get(0));
+        String s2=str.substring(list.get(0)+1,list.get(1));
+        String s3=str.substring(list.get(1)+1,list.get(2));
+        String s4=str.substring(list.get(2)+1,str.length());
+        ArrayList <String> strings=new ArrayList<>();
+        strings.add(s1);
+        strings.add(s2);
+        strings.add(s3);
+        strings.add(s4);
+
+        for (int i = 0; i <strings.size() ; i++) {
+            String s=strings.get(i);
+            if (s.length()>3||s.length()==0){
+                return false;
+            }
+            if (s.charAt(0)-'0'>=3){
+                if (s.length()==3){
+                    return false;
+                }
+            }else {
+                if (s.charAt(0)-'0'==0){
+                    if (s.length()==2||s.length()==3){
+                        return false;
+                    }
+                }
+                if (s.charAt(0)-'0'==2){
+                    if (s.length()==3&&s.charAt(1)-'0'>5){
+                        return false;
+                    }
+
+                    if (s.length()==3&&s.charAt(1)-'0'==5&&s.charAt(2)-'0'>5){
+                        return false;
+                    }
+
+                }
+
+            }
+        }
+        return true;
+    }
     public static void main(String[] args) {
-        String s="MCMXCIV";
-        System.out.println(romanToInt(s));
+    String s="172162541";
+    List<String> l=restoreIpAddresses(s);
 
     }
 

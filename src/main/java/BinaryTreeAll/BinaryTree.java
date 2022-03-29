@@ -1,9 +1,14 @@
+package BinaryTreeAll;
+
+import sun.reflect.generics.tree.Tree;
+
 import javax.sound.sampled.DataLine.Info;
+import javax.swing.tree.TreeNode;
 import java.util.*;
 
 /**
  * @author zhang
- * @ClassName: BinaryTree
+ * @ClassName: BinaryTreeAll.BinaryTree
  * @Package PACKAGE_NAME
  * @Description: 二叉树
  * @date 2021/12/1416:58
@@ -46,6 +51,10 @@ public class BinaryTree {
         System.out.println(head.value);
     }
 
+
+
+
+
     //先序遍历
     //栈：
     //1.弹出即打印
@@ -72,6 +81,40 @@ public class BinaryTree {
         }
         System.out.println(" ");
     }
+
+ public static class TreeNode {
+      int val;
+      TreeNode left;
+      TreeNode right;
+      TreeNode() {}
+      TreeNode(int val) { this.val = val; }
+      TreeNode(int val, TreeNode left, TreeNode right) {
+          this.val = val;
+          this.left = left;
+          this.right = right;
+      }
+  }
+  //144
+    public static List<Integer> preorderTraversal(TreeNode root) {
+        if (root==null){
+            return new ArrayList<>();
+        }
+        Deque<TreeNode> stack=new LinkedList<>();
+        List<Integer> list=new ArrayList<>();
+        stack.push(root);
+        while (!stack.isEmpty()){
+            TreeNode cur=stack.pop();
+            list.add(cur.val);
+            if (cur.right!=null){
+                stack.push(cur.right);
+            }
+            if (cur.left!=null){
+                stack.push(cur.left);
+            }
+        }
+        return list;
+    }
+
     //后序遍历
     //栈：
     //1.弹出 再压入新栈
@@ -122,6 +165,29 @@ public class BinaryTree {
         }
     }
 
+
+    public static List<Integer> inorderTraversal(TreeNode root) {
+        if (root==null){
+            return new ArrayList<>();
+        }
+        Deque<TreeNode> stack=new LinkedList<>();
+        List<Integer> list=new ArrayList<>();
+        TreeNode cur=root;
+        while (cur!=null){
+            stack.push(cur);
+            cur=cur.left;
+        }
+        while (!stack.isEmpty()) {
+            cur = stack.pop();
+            list.add(cur.val);
+            cur = cur.right;
+            while (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
+            }
+        }
+        return list;
+    }
     //后序遍历2
     public static void pos2(Node h){
         System.out.println("后序遍历：");
@@ -170,6 +236,66 @@ public class BinaryTree {
                 queue.add(cur.right);
             }
         }
+    }
+
+//给定二叉树的根，返回给定树的最大宽度。
+//树的最大宽度是所有级别之间的最大宽度。
+//一层的宽度被定义为末端节点(最左和最右的非空节点)之间的长度，其中在一个完整的二叉树中出现的末端节点之间的空节点也被计算到长度计算中。
+//它保证了答案将在一个32位有符号整数的范围内。
+    static int dfsmax=0;
+    public static int widthOfBinaryTree(TreeNode root) {
+        if (root==null){
+            return 0;
+        }
+        HashMap<Integer, Integer>  map=new HashMap<>();
+        dfs(root,1,1,map);
+        return dfsmax;
+    }
+    public static void dfs(TreeNode root,int level,int p,HashMap<Integer, Integer> map){
+        if (root==null){
+            return ;
+        }
+        if (!map.containsKey(level)){
+            map.put(level,p);
+        }
+        dfsmax=Math.max(dfsmax,p-map.get(level)+1);
+        dfs(root.left,level+1,2*p,map);
+        dfs(root.right,level+1,2*p+1,map);
+    }
+    public static int widthOfBinaryTree2(TreeNode root){
+        if (root==null){
+            return 0;
+        }
+        HashMap <TreeNode,Integer> map=new HashMap<>();
+        HashMap<TreeNode,Integer> val=new HashMap<>();
+        Queue<TreeNode> queue=new LinkedList<>();
+        int curLevel=1;
+        int curMin=1;
+        int max=0;
+        queue.add(root);
+        map.put(root,1);
+        val.put(root,1);
+        while(!queue.isEmpty()){
+            TreeNode curNode=queue.poll();
+            int level=map.get(curNode);
+            int p=val.get(curNode);
+            if (level!=curLevel){
+                curLevel=level;
+                curMin=p;
+            }
+            if (curNode.left!=null){
+                queue.add(curNode.left);
+                map.put(curNode.left,level+1);
+                val.put(curNode.left,2*p);
+            }
+            if (curNode.right!=null){
+                queue.add(curNode.right);
+                map.put(curNode.right,level+1);
+                val.put(curNode.right,2*p+1);
+            }
+            max=Math.max(max,p-curMin+1);
+        }
+        return max;
     }
 
     //求二叉树最大宽度 使用HashMap
@@ -480,23 +606,96 @@ public class BinaryTree {
 
     }
 
-
-    //打印一棵二叉树 (未完成)
-    public static void printInOrder(Node head,int height,String to,int len){
-        if (head==null){
-            return;
+    //序列化是将一个数据结构或对象转换成一个位序列的过程，以便将其存储在文件或内存缓冲区中，或通过网络连接链路传输，
+    // 以便稍后在同一或另一个计算机环境中重新构建。
+    //设计一个算法来序列化和反序列化一个二叉树。 对序列化/反序列化算法的工作方式没有限制。
+    // 您只需要确保二叉树可以序列化为一个字符串，这个字符串可以反序列化为原始的树结构。
+    //说明:输入/输出格式与LeetCode序列化二叉树的方式相同。 你不一定要遵循这种格式，所以请富有创造力，自己想出不同的方法。
+// Encodes a tree to a single string.
+    public static String serialize(TreeNode root) {
+        if (root==null){
+            return null;
         }
-        printInOrder(head.right,height+1,"v",len);
-        String val=to+head.value+to;
-        int lenM = val.length();
-        int lenL=(len-lenM)/2;
-        int lenR=len-lenM-lenL;
+        Queue <TreeNode>queue=new LinkedList();
+        queue.add(root);
+        StringBuilder sb=new StringBuilder();
+        while (!queue.isEmpty()){
+            TreeNode cur=queue.poll();
+            if (cur.val==Integer.MIN_VALUE){
+                sb.append("/"+"*");
+                continue;
+            }
+            sb.append("/"+cur.val);
 
-
-
-
+            if (cur.left==null){
+                queue.add(new TreeNode(Integer.MIN_VALUE));
+            }else {
+                queue.add(cur.left);
+            }
+            if (cur.right==null){
+                queue.add(new TreeNode(Integer.MIN_VALUE));
+            }else {
+                queue.add(cur.right);
+            }
+        }
+        return sb.toString();
+    }
+    // Decodes your encoded data to tree.
+    public static TreeNode deserialize(String data) {
+        if (data==null){
+            return null;
+        }
+        Queue <Integer>val =new LinkedList<>();
+        Queue<TreeNode> queue=new LinkedList<>();
+        int start=0;
+        for (int i = 1; i <data.length();i++) {
+            if (data.charAt(i)=='/'){
+                    String s=data.substring(start+1,i);
+                    start=i;
+                    if (s.equals("*")){
+                        val.add(null);
+                        continue;
+                    }
+                    val.add(Integer.parseInt(s));
+            }
+        }
+        TreeNode head=new TreeNode(val.poll());
+        queue.add(head);
+        TreeNode cur=null;
+        while (!queue.isEmpty()){
+             cur=queue.poll();
+             cur.left=generateNode(val.poll());
+             cur.right=generateNode(val.poll());
+             if (cur.left!=null){
+                 queue.add(cur.left);
+             }
+             if (cur.right!=null){
+                 queue.add(cur.right);
+             }
+        }
+return head;
+    }
+    public static TreeNode generateNode(Integer c){
+        if (c==null){
+            return null;
+        }
+        return new TreeNode(c);
 
     }
+
+
+    //打印一棵二叉树 (未完成)
+//    public static void printInOrder(Node head,int height,String to,int len){
+//        if (head==null){
+//            return;
+//        }
+//        printInOrder(head.right,height+1,"v",len);
+//        String val=to+head.value+to;
+//        int lenM = val.length();
+//        int lenL=(len-lenM)/2;
+//        int lenR=len-lenM-lenL;
+//
+//    }
 
     //给任意节点找出其中序的后续节点
     //思路一：通过父节点找到头节点 再通过中序遍历加入到数组中 最后找到节点的后继节点
@@ -600,8 +799,73 @@ public class BinaryTree {
         }
         printProcess(i+1,N,true);
         System.out.println(down ? "凹" : "凸");
-        printProcess(i+1,N,true);
+        printProcess(i+1,N,false);
     }
+
+    //已知一棵有n个节点的二叉树的根，其中每个节点都有node. val硬币。 整棵树总共有n个硬币。
+    //在一次移动中，我们可以选择两个相邻的节点并将一枚硬币从一个节点移动到另一个节点。 移动
+    // 可以是从父结点移动到子结点，或者从子结点移动到父结点。
+    //返回使每个节点拥有一枚硬币所需的最小移动数。
+
+    public static class InfoDC{
+        int steps;
+        int rest;
+
+        public InfoDC(int steps, int rest) {
+            this.steps = steps;
+            this.rest = rest;
+        }
+    }
+    public static int distributeCoins(TreeNode root) {
+        if (root==null){
+            return 0;
+        }
+        return processCoins(root).steps;
+
+    }
+    public static InfoDC processCoins(TreeNode root){
+        if (root==null){
+            return new InfoDC(0,0);
+        }
+
+        InfoDC l=processCoins(root.left);
+        InfoDC r=processCoins(root.right);
+
+        int step=0;
+        int rest=root.val-1;
+
+        if (l.rest>=0){
+            step+=l.rest;
+            rest+=l.rest;
+        }else {
+            step-=l.rest;
+            rest+=l.rest;
+        }
+        if (r.rest>=0){
+            step+=r.rest;
+            rest+=r.rest;
+        }else {
+            step-=r.rest;
+            rest+=r.rest;
+        }
+
+        step=step+r.steps+l.steps;
+        return new InfoDC(step,rest);
+    }
+
+
+    public static void main(String[] args) {
+        TreeNode node1=new TreeNode(0);
+        TreeNode node2=new TreeNode(3);
+        TreeNode node3=new TreeNode(0);
+        node1.left=node2;
+        node1.right=node3;
+
+        System.out.println(distributeCoins(node1));
+
+
+    }
+
 
 
     //递归套路

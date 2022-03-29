@@ -1,7 +1,8 @@
 import com.sun.org.apache.regexp.internal.RE;
 import javafx.stage.Window;
 
-import java.util.LinkedList;
+import java.util.*;
+import java.util.function.IntFunction;
 
 /**
  * @author zhang
@@ -116,14 +117,156 @@ return maxWindow;
     }
 
 
+
+
+    //DNA序列由一系列核苷酸组成，缩写为“A”、“C”、“G”和“T”。
+    //例如，“ACGAATTCCG”是一个DNA序列。
+    //在研究DNA时，识别DNA中的重复序列是很有用的。
+    //给定一个表示DNA序列的字符串s，返回所有在DNA分子中出现不止一次的10个字母长的序列(子字符串)。 你可以按任意顺序返回答案。
+    public static List<String> findRepeatedDnaSequences(String s) {
+         List<String> lists=new ArrayList<>();
+         HashMap<String,Integer> map=new HashMap<>();
+         int left=0;
+         int right=9;
+         while (right<s.length()){
+             String cur=s.substring(left,right+1);
+             map.put(cur,map.getOrDefault(cur,0)+1);
+             if (map.get(cur)==2){
+                 lists.add(cur);
+             }
+             left++;
+             right++;
+         }
+         return lists;
+    }
+
+    //给定一个正整数数组nums和一个正整数目标，返回连续子数组的最小长度[numsl, numsl+1，…， numsr-1, numsr]，
+    // 其和大于或等于target。 如果没有这样的子数组，则返回0。
+    public static int minSubArrayLen(int target, int[] nums) {
+         int left=0;
+         int min=Integer.MAX_VALUE;
+         int sum=0;
+        for (int i = 0; i <nums.length; i++) {
+            sum+=nums[i];
+            if (sum>=target){
+                while (sum>=target&&left<=i){
+                    int len=i-left+1;
+                    if (len<min){
+                        min=len;
+                    }
+                    sum-=nums[left++];
+                }
+            }
+        }
+        return min==Integer.MAX_VALUE?0:min;
+    }
+
+    //给定一个整数数组nums，有一个大小为k的滑动窗口从数组的最左边移动到最右边。你只能看到窗口中的k个数字。每次滑动窗口向右移动一个位置。
+    //返回最大滑动窗口。
+    public static int[] maxSlidingWindow(int[] nums, int k) {
+         if (nums==null||nums.length<k){
+             return null;
+         }
+         LinkedList<Integer> maxLink=new LinkedList<>();
+         int [] res=new int[nums.length-k+1];
+         for (int i = 0; i <k ; i++) {
+             while (!maxLink.isEmpty()&&nums[maxLink.getLast()]<=nums[i]){
+                 maxLink.pollLast();
+             }
+             maxLink.add(i);
+         }
+         int target=0;
+         res[target++]=nums[maxLink.getFirst()];
+
+        for (int j=0,i = k; i < nums.length;i++,j++) {
+            if (j==maxLink.getFirst()){
+                maxLink.pollFirst();
+            }
+            while (!maxLink.isEmpty()&&nums[maxLink.getLast()]<=nums[i]){
+                maxLink.pollLast();
+            }
+            maxLink.add(i);
+            res[target++]=nums[maxLink.getFirst()];
+        }
+
+        return res;
+    }
+
+    // 滑动窗口中值
+
+    static PriorityQueue <Integer> min=new PriorityQueue<>();
+    static PriorityQueue<Integer> max=new PriorityQueue<>(Comparator.reverseOrder());
+    public static double[] medianSlidingWindow(int[] nums, int k) {
+         if (nums==null||nums.length<k){
+             return null;
+         }
+         double[] res=new double[nums.length-k+1];
+         int target=0;
+        for (int i = 0; i <k ; i++) {
+            add(nums[i]);
+        }
+        res[target++]=getMax();
+        remove(nums[0]);
+        for (int start = 1,end=k; end <nums.length;) {
+            add(nums[end++]);
+            res[target++]=getMax();
+            remove(nums[start++]);
+        }
+        return res;
+    }
+    public static void add(int num){
+        if (max.size()==0){
+            max.add(num);
+            return;
+        }
+        if (num<=max.peek()){
+            max.add(num);
+        }else {
+            min.add(num);
+        }
+        balance();
+    }
+
+
+    public static void balance(){
+        if (min.size()-max.size()>=2){
+            max.add(min.poll());
+        }
+        if (max.size()-min.size()>=2){
+            min.add(max.poll());
+        }
+    }
+
+    public static void  remove(int num){
+        if (max.remove(num)){
+            balance();
+            return;
+        }else{
+            min.remove(num);
+            balance();
+        }
+    }
+    public static double getMax(){
+        if (max.size()==min.size()){
+            return(min.peek()+ 0.0 + max.peek())/2.0;
+        }
+        else if (max.size()>min.size()){
+            return (double)max.peek();
+        }
+        else{
+         return (double)min.peek();
+        }
+    }
+
+
     public static void main(String[] args) {
-         int [] i={4,3,5,4,3,3,6,7};
-         int w=3;
-         int []res=getMaxWindow(i,w);
-        int []res2=getMaxWindow2(i,w);
-        for (int j = 0; j <res.length ; j++) {
-            System.out.print(res[j]);
-            System.out.println(res2[j]);
+       int []nums={-2147483648,-2147483648,2147483647,-2147483648,-2147483648,
+               -2147483648,2147483647,2147483647,2147483647,2147483647,-2147483648,2147483647,-2147483648};
+       int k=2;
+
+       double [] res=medianSlidingWindow(nums,k);
+        for (int i = 0; i <res.length ; i++) {
+            System.out.print(res[i]+" ");
         }
     }
 
