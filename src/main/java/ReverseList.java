@@ -1,9 +1,6 @@
 import org.w3c.dom.Node;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @author zhang
@@ -13,6 +10,126 @@ import java.util.Stack;
  * @date 2021/11/3016:27
  */
 public class ReverseList {
+
+    //给定链表的头，删除链表末尾的第n个节点并返回其头。
+    public static class ListNode {
+     int val;
+      ListNode next;
+      ListNode() {}
+      ListNode(int val) { this.val = val; }
+      ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+  }
+    public static ListNode removeNthFromEnd(ListNode head, int n) {
+        if (head==null){
+            return null;
+        }
+        int len=0;
+        ListNode cur=head;
+        while (cur!=null){
+            cur=cur.next;
+            len++;
+        }
+        if (len<n){
+            return null;
+        }
+        int count=0;
+        cur=head;
+        ListNode pre=null;
+        while (true){
+            if (count==(len-n)){
+                break;
+            }
+            pre=cur;
+            cur=cur.next;
+            count++;
+        }
+        if (cur.next==null){
+            if (pre!=null){
+                pre.next=null;
+            }else{
+                head=null;
+            }
+        }else {
+            if (pre==null){
+                head=cur.next;
+            }else {
+                pre.next=cur.next;
+            }
+            cur.next=null;
+        }
+
+        return head;
+    }
+
+
+
+    //给定一个链表的头，一次反转链表k的节点，并返回修改后的链表。
+    //K是一个正整数，小于或等于链表的长度。 如果节点数不是k的倍数，那么被遗漏的节点最终应该保持原样。
+    //您不能更改列表节点中的值，只能更改节点本身。
+    public static ListNode reverseKGroup(ListNode head, int k) {
+        if (head==null){
+            return null;
+        }
+        int count=0;
+        int num=1;
+        ListNode cur=head;
+        while (cur!=null){
+            if (num==k){
+                count++;
+                num=0;
+            }
+            num++;
+            cur=cur.next;
+        }
+        cur=head;
+        List<ListNode> heads=new ArrayList<>();
+        List<ListNode> tails=new ArrayList<>();
+        for (int i = 0; i <count ; i++) {
+            ListNode first=null;
+            ListNode last=cur;
+            ListNode pre=null;
+            ListNode next=null;
+            for (int j = 1; j <=k ; j++) {
+                next=cur.next;
+                cur.next=pre;
+                pre=cur;
+                if (j==k){
+                    first=cur;
+                }
+                cur=next;
+            }
+            heads.add(first);
+            tails.add(last);
+        }
+        heads.add(cur);
+        int headnum=1;
+        for (ListNode tail:tails){
+            tail.next=heads.get(headnum);
+            headnum++;
+        }
+        return heads.get(0);
+    }
+
+
+    public static void main(String[] args) {
+        ListNode node1=new ListNode(1);
+        ListNode node2=new ListNode(2);
+        ListNode node3=new ListNode(3);
+        ListNode node4=new ListNode(4);
+        ListNode node5=new ListNode(5);
+        node1.next=node2;
+        node2.next=node3;
+        node3.next=node4;
+        node4.next=node5;
+        int k=3;
+        ListNode node=reverseKGroup(node1,k);
+        while (node!=null){
+            System.out.print(node.val);
+            node=node.next;
+        }
+
+    }
+
 
     //双向链表
     public static class Node{
@@ -575,31 +692,6 @@ return pre;
 
 
 
-
-
-
-
-
-
-
-
-
-
-    public static void main(String[] args) {
-        Node1 head=new Node1(1);
-        Node1 node1=new Node1(2);
-        Node1 node2=new Node1(3);
-        head.next=node1;
-        node1.next=node2;
-        head.rand=node2;
-        node1.rand=null;
-        node2.rand=node1;
-        copyListWithRand1(head);
-        HashSet set=new HashSet<String>();
-        set.add(head);
-        set.add(head);
-        set.add(head);
-    }
 
 
 

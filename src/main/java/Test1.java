@@ -4672,9 +4672,42 @@ public static boolean processLCA(TreeNode cur,TreeNode p,TreeNode q){
         }
         return true;
     }
+
+    //给定n个非负整数表示一个高程图，其中每个条的宽度是1，计算出下雨后它能捕获多少水。
+    public static int trap(int[] height) {
+    if (height==null||height.length<3){
+        return 0;
+    }
+    int [] leftmax=new int[height.length];
+    int [] rightmax=new int[height.length];
+    int lmax=Integer.MIN_VALUE;
+    int rmax=Integer.MIN_VALUE;
+    int res=0;
+        for (int i = 0; i <height.length ; i++) {
+            lmax=Math.max(lmax,height[i]);
+            leftmax[i]=lmax;
+        }
+        for (int i = height.length-1; i >=0 ; i--) {
+            rmax=Math.max(rmax,height[i]);
+            rightmax[i]=rmax;
+        }
+
+        for (int i = 0; i <height.length ; i++) {
+            if (height[i]<leftmax[i]&&height[i]<rightmax[i]){
+                if (leftmax[i]<rightmax[i]){
+                    res+=leftmax[i]-height[i];
+                }else {
+                    res+=rightmax[i]-height[i];
+                }
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
-    String s="172162541";
-    List<String> l=restoreIpAddresses(s);
+    int []height={4,2,0,3,2,5};
+        System.out.println(trap(height));
+
 
     }
 
