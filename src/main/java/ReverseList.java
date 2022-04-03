@@ -111,6 +111,9 @@ public class ReverseList {
     }
 
 
+
+
+
     public static void main(String[] args) {
         ListNode node1=new ListNode(1);
         ListNode node2=new ListNode(2);
@@ -541,6 +544,7 @@ return pre;
     //当快慢指针重合时  快指针回到头节点 慢指针不动；快指针和慢指针以相同的一步速度往下走
 
     //当快慢指针再次重合时，重合的节点即相交节点
+
     public static Node getLoopNode(Node head){
         if (head==null||head.next==null||head.next.next==null){
             return null;
