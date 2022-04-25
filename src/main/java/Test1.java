@@ -3346,6 +3346,12 @@ return dp[start];
     }
 
 
+    public static void main(String[] args) {
+        // int [][]graph={{1,2,3,5},{0,5},{0,4},{0},{5,2},{0,4,1}};
+        int [][]graph={{1},{0,2,4},{1,3,4},{2},{1,2}};
+        System.out.println(shortestPathLength(graph));
+
+    }
 
 
 
@@ -4704,11 +4710,5 @@ public static boolean processLCA(TreeNode cur,TreeNode p,TreeNode q){
         return res;
     }
 
-    public static void main(String[] args) {
-    int []height={4,2,0,3,2,5};
-        System.out.println(trap(height));
-
-
-    }
 
 }

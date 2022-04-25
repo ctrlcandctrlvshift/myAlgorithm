@@ -1,5 +1,10 @@
+import sun.misc.Unsafe;
+
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author zhang
@@ -97,6 +102,215 @@ public class UnionFind {
             return sizeMap.size();
         }
     }
+
+    //给定一个m x n个二维二进制网格，它表示“1”(土地)和“0”(水)的地图，返回岛屿的数量。
+    //岛屿被水包围，通过水平或垂直连接相邻的陆地而形成。 你可以假设网格的四边都被水包围着。
+    public static int numIslands(char[][] grid) {
+        if (grid==null||grid.length==0){
+            return 0;
+        }
+        int count=0;
+        for (int i = 0; i <grid.length ; i++) {
+            for (int j = 0; j <grid[0].length ; j++) {
+                if (grid[i][j]=='1'){
+                    count++;
+                    infectIslands(grid,i,j,grid.length-1,grid[0].length-1);
+                }
+            }
+        }
+
+        return count;
+    }
+    public static void infectIslands(char [][]m,int right,int down,int row,int col){
+        if (right>row||down>col||down<0||right<0||m[right][down]=='0'||m[right][down]=='2'){
+            return;
+        }
+        m[right][down]='2';
+        infectIslands(m,right+1,down,row,col);
+        infectIslands(m,right,down+1,row,col);
+        infectIslands(m,right-1,down,row,col);
+        infectIslands(m,right,down-1,row,col);
+    }
+
+
+
+    //在这个问题中，树是一个连通且无环的无向图。你得到一个图，它开始是一个树，有n个节点标记为1到n，
+    // 并添加了一条额外的边。添加的边从1到n有两个不同的顶点，并且不是已经存在的边。
+    // 图表示为一个长度为n的数组边，边[i] = [ai, bi]表示图中节点ai和bi之间存在一条边。返回一条可以删除的边，
+    // 这样得到的图形就是一个有n个节点的树。如果有多个答案，则返回输入中最后出现的答案。
+    public static int[] findRedundantConnection(int[][] edges) {
+        if (edges==null){
+            return null;
+        }
+        int n=edges.length;
+        int []p=new int[n+1];
+        int []s=new int[n+1];
+        for (int i = 1; i <=n ; i++) {
+            p[i]=i;
+            s[i]=1;
+        }
+        int []ans=new int[2];
+
+        for (int i = 0; i <n ; i++) {
+            if (isUnion(s,p,edges[i][0],edges[i][1])){
+                ans=edges[i];
+            }
+        }
+
+        return ans;
+    }
+
+    public static int findp(int []p,int c1){
+        if (c1==p[c1]){
+            return c1;
+        }
+        c1=findp(p,p[c1]);
+        return c1;
+    }
+
+    public static boolean isUnion(int []s,int []p,int c1,int c2){
+        int p1=findp(p,c1);
+        int p2=findp(p,c2);
+        if (p1==p2){
+            return true;
+        }else {
+            if (s[p1]>s[p2]){
+                p[p2]=p1;
+                s[p1]+=s[p2];
+            }else {
+                p[p1]=p2;
+                s[p2]+=s[p1];
+            }
+        }
+        return false;
+    }
+//有n个城市。其中一些是连接的，而另一些则不是。如果a市与b市直接相连，b市与c市直接相连，则a市与c市间接相连。
+//一个省是由直接或间接相连的城市组成的一组，除省外没有其他城市。
+//如果第i个城市和第j个城市是直接相连的，则isConnected[i][j] = 1，否则isConnected[i][j] = 0。
+//返回省的总数。
+    public static int findCircleNum(int[][] isConnected) {
+        if (isConnected==null){
+            return 0;
+        }
+        int n=isConnected[0].length;
+        int []p=new int[n+1];
+        int []s=new int[n+1];
+        int []index=new int[n+1];
+        for (int i = 1; i <=n ; i++) {
+            p[i]=i;
+            s[i]=1;
+            index[i]=1;
+        }
+        for (int i = 0; i <n ; i++) {
+            for (int j = 0; j <n ; j++) {
+                if (isConnected[i][j]==1){
+                 uoin(p,s,i+1,j+1,index);
+                }
+            }
+        }
+        int count=0;
+        for (int i = 1; i <n+1 ; i++) {
+            if (index[i]==1){
+                count++;
+            }
+        }
+        return count;
+    }
+    public static int findFa(int []p,int c1){
+        if (p[c1]==c1){
+            return p[c1];
+        }
+        return findFa(p,p[c1]);
+    }
+    public static void uoin(int []p,int []s,int c1,int c2,int []index){
+        int p1=findFa(p,c1);
+        int p2=findFa(p,c2);
+
+        if (p1!=p2){
+            if (s[p1]>s[p2]){
+                p[p2]=p1;
+                s[p1]+=s[p2];
+                index[p1]=1;
+                index[p2]=0;
+            }else {
+                p[p1]=p2;
+                s[p2]+=s[p1];
+                index[p2]=1;
+                index[p1]=0;
+            }
+        }
+    }
+
+    //在这个问题中，有根树是这样一种有向图，其中只有一个节点(根)，其他所有节点都是这个节点的后代，
+    // 加上每个节点都只有一个父节点，除了根节点没有父节点。
+    //给定的输入是一个有向图，它开始是一个有根的树，有n个节点(从1到n的不同值)，并添加了一个额外的有向边。 添加的边从1到n有两个不同的顶点，并且不是已经存在的边。
+    //得到的图是一个二维的边数组。 每个边的元素是一对[ui, vi]，表示连接节点ui和vi的有向边，其中ui是子vi的父节点。
+    //返回一条可以删除的边，这样得到的图就是一个有n个节点的有根树。 如果有多个答案，则返回在给定2d数组中最后出现的答案。
+    public static int[] findRedundantDirectedConnection(int[][] edges) {
+        if (edges==null){
+            return null;
+        }
+        int n=edges.length;
+        int []p =new int[n+1];
+        int []index=new int[n+1];
+        for (int i = 1; i <=n ; i++) {
+            p[i]=i;
+        }
+        int first=-1;
+        int second=-1;
+        Arrays.fill(index,-2);
+        for (int i = 0; i <n ; i++) {
+            if (index[edges[i][1]]!=-2){
+                first=index[edges[i][1]];
+                second=i;
+                break;
+            }
+            index[edges[i][1]]=i;
+        }
+        for (int i = 0; i <n ; i++) {
+            if (i==second){
+                continue;
+            }
+            if (unionAndCheck(p,edges[i][0],edges[i][1])) {
+                if (first==-1){
+                    return edges[i];
+                }else {
+                    return edges[first];
+                }
+            }
+        }
+        return edges[second];
+    }
+
+    public static boolean  unionAndCheck(int []p,int c1,int c2){
+        int p1=findFather(p,c1);
+        int p2=findFather(p,c2);
+
+        if (p1!=p2){
+            p[p2]=p1;
+        }else {
+             return true;
+        }
+        return false;
+    }
+
+    public static int findFather(int []p,int c){
+        if (p[c]==c){
+            return c;
+        }
+        return findFather(p,p[c]);
+    }
+
+
+    public static void main(String[] args) {
+        int [][]edges={{1,2},{2,3},{3,1},{4,1}};
+        int []edge=findRedundantDirectedConnection(edges);
+        for (int i:edge){
+            System.out.print(i);
+        }
+    }
+
+
 
     //如果两个user a字段一样 或者b 或者c一样 就认为是一个人
     //请返回合并后的用户数

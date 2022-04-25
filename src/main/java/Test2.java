@@ -1,5 +1,7 @@
 import org.w3c.dom.Node;
 
+import java.util.HashMap;
+
 /**
  * @author zhang
  * @ClassName: Test2
@@ -139,22 +141,37 @@ public static ListNode detectCycle(ListNode head) {
 
         return 0;
     }
+
+    public static int lengthOfLongestSubstring(String s) {
+        if (s==null||s.length()==0){
+            return 0;
+        }
+        HashMap<Character, Integer> map=new HashMap<>();
+        int max=Integer.MIN_VALUE;
+        int n=s.length();
+        int near=0;
+        for (int i = 0; i <n ; i++) {
+            char cur=s.charAt(i);
+            if (map.containsKey(cur)){
+                int index=map.get(cur);
+                if (index<near){
+                    max=Math.max(max,i-near+1);
+                }else {
+                    near=index+1;
+                }
+            }else {
+                max=Math.max(max,i-near+1);
+            }
+            map.put(cur,i);
+        }
+
+        return max;
+    }
     public static void main(String[] args) {
-//        ListNode node1=new ListNode(1);
-//        ListNode node2=new ListNode(2);
-//        ListNode node3=new ListNode(3);
-//        ListNode node4=new ListNode(4);
-//
-//        node1.next=node2;
-//        node2.next=node3;
-//        node3.next=node4;
-//        node4.next=node3;
-//
-//       //System.out.println(hasCycle(node1));
-//
-//        System.out.println(detectCycle(node1).val);
-        int [] num={3,1,3,4,2};
-        System.out.println(findDuplicate(num));
+        String s="pwwkew";
+        System.out.println(lengthOfLongestSubstring(s));
+
+
     }
 
 
