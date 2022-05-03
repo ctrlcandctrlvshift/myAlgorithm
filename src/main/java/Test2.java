@@ -1,6 +1,10 @@
 import org.w3c.dom.Node;
 
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author zhang
@@ -168,8 +172,11 @@ public static ListNode detectCycle(ListNode head) {
         return max;
     }
     public static void main(String[] args) {
-        String s="pwwkew";
-        System.out.println(lengthOfLongestSubstring(s));
+        ReentrantLock reentrantLock=new ReentrantLock();
+        Thread thread=Thread.currentThread();
+        System.out.println(thread.isInterrupted());
+        ThreadLocal threadLocal=new ThreadLocal();
+
 
 
     }
