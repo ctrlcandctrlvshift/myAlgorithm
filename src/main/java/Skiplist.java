@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.IntFunction;
 
 /**
  * @author zhang
@@ -32,7 +33,7 @@ public class Skiplist {
   public static  class  Skiplist2{
       private static  final int maxlevel=32;
       private static final  double  probability=0.5;
-      private HashSet set;
+      private HashMap<Integer, Integer> map;
       private int curLevel;
       class Node{
           int value;
@@ -58,10 +59,9 @@ public class Skiplist {
 
       public Skiplist2() {
           this.head=new Node(-1);
-          this.set=new HashSet();
+          this.map=new HashMap<>();
           this.curLevel=0;
       }
-
       public boolean search(int target) {
           if (!contains(target)){
               return false;
@@ -71,14 +71,19 @@ public class Skiplist {
           while (level>=0){
               Node pre=node;
               Node next=node.nextNode(level);
-              while (next.value<target){
-                  pre=next;
-                  next=next.nextNode(level);
+
+              while (next!=null){
+                  if (next.value<target){
+                      pre=next;
+                      next=next.nextNode(level);
+                  }else {
+                      break;
+                  }
               }
-              if (next.value==target){
+              if (next!=null&&next.value==target){
                   return true;
               }
-              if (next.value>target){
+              if (next==null||next.value>target){
                   node=pre;
               }
               level--;
@@ -87,9 +92,12 @@ public class Skiplist {
           return false;
       }
       public void add(int num) {
-          if (!contains(num)){
               int level=randomLevel();
-              set.add(num);
+              if (map.containsKey(num)){
+                  map.put(num,map.get(num)+1);
+              }else {
+                  map.put(num,1);
+              }
               if (level>curLevel){
                   curLevel=level;
               }
@@ -100,9 +108,7 @@ public class Skiplist {
               while (level>=0){
                   Node pre=node;
                   Node next=node.nextNode(level);
-                  if (next==null){
-                      pre.forward.set(level,newN);
-                  }
+
                   while (next!=null){
                           if (next.value<num){
                               pre=next;
@@ -114,11 +120,13 @@ public class Skiplist {
                               break;
                           }
                       }
+                  if (next==null){
+                      pre.forward.set(level,newN);
+                  }
+
                   level--;
               }
-          }
       }
-
       //随机层数
       public int randomLevel(){
           int level=0;
@@ -127,10 +135,14 @@ public class Skiplist {
           }
           return level;
       }
-
       public boolean erase(int num) {
           if (!contains(num)){
               return false;
+          }
+          if ((map.get(num)-1)==0){
+              map.remove(num);
+          }else {
+              map.put(num,map.get(num)-1);
           }
           int level=curLevel;
           Node node=head;
@@ -150,12 +162,25 @@ public class Skiplist {
           }
           return true;
       }
-
       public boolean contains(int num){
-          return set.contains(num);
+          return map.containsKey(num);
       }
 
   }
 
+    public static void main(String[] args) {
+      Skiplist2 skiplist2=new Skiplist2();
+      skiplist2.add(1);
+      skiplist2.add(2);
+      skiplist2.add(3);
+        System.out.println(skiplist2.search(0));
+        skiplist2.add(4);
+        System.out.println(skiplist2.search(1));
+        skiplist2.add(5);
+        System.out.println(skiplist2.search(3));
+        System.out.println(skiplist2.search(6));
+
+
+    }
 
 }

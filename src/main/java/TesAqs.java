@@ -35,7 +35,7 @@ class MyLock implements Lock{
         protected boolean tryRelease(int arg) {
             setExclusiveOwnerThread(null);
             setState(0);
-
+            return false;
         }
     }
 
