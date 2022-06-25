@@ -17,11 +17,7 @@ public class Recursion {
 
     //这个函数为复杂度为
     //T(N) =2T(N/2)+O(N^0)
-    public static void main(String[] args) {
-        int [] arr={3,4,1,7};
 
-
-    }
     public static int processGetMax(int arr[],int L,int R){
         if (L==R){
             //L到R范围只有一个数时候，直接返回该数
@@ -269,7 +265,36 @@ public class Recursion {
     }
 
 
+    //冒泡
+    public static int []paopao(int [] arr){
+        while (arr==null||arr.length==0){
+            return null;
+        }
+        int num=arr.length-1;
+        while (num>0){
+            int p1=0;
+            int p2=1;
+            while (p2<=num){
+                if (arr[p1]>arr[p2]){
+                    swap(arr,p1,p2);
+                }
+                p1++;
+                p2++;
+            }
+            num--;
+        }
+        return arr;
+    }
 
+
+    public static void main(String[] args) {
+        int[] arr={7,3,5,4,1,2,6};
+        int [] res=paopao(arr);
+        for (int i:res){
+            System.out.print(i+" ");
+        }
+
+    }
 
 
 
