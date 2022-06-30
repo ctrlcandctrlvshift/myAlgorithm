@@ -1114,11 +1114,57 @@ return null;
         }
         return res;
     }
-    //优化
+    //优化暂无
+
+
+    //75
+    //SortColors
+    public static void sortColors(int[] nums) {
+        int [] colors=new int[3];
+        for(int i:nums){
+            colors[i]++;
+        }
+        int index=0;
+        for (int i = 0; i <3 ; i++) {
+            int curCol=colors[i];
+            while (curCol>0){
+                nums[index++]=i;
+                curCol--;
+            }
+        }
+
+    }
+    //78
+    //Subsets
+    public static List<List<Integer>> subsets(int[] nums) {
+        if (nums==null){
+            return null;
+        }
+        List<List<Integer>> res=new ArrayList<>();
+        if (nums.length==0){
+            return res;
+        }
+        processSubsets(0,new ArrayList<>(),res,nums);
+        return res;
+    }
+
+    public static void processSubsets(int index,List<Integer> list,List<List<Integer>> res,int []nums){
+        if (index==nums.length){
+            res.add(new ArrayList<>(list));
+            return;
+        }
+        //不拿这个数
+        processSubsets(index+1,list,res,nums);
+        //拿这个数
+        list.add(nums[index]);
+        processSubsets(index+1,list,res,nums);
+        list.remove(list.size()-1);
+    }
+
+
 
     public static void main(String[] args) {
-        int []nums={10,1,10,10,10};
-      //  List list=Arrays.asList(quiet(nums));
-        Arrays.stream(quiet(nums)).forEach(System.out::print);
+        int []nums={1,2,3};
+        List<List<Integer>>res=subsets(nums);
     }
 }
