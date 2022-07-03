@@ -1115,6 +1115,7 @@ return null;
         return res;
     }
     //优化
+    //测试
 
     public static void main(String[] args) {
         int []nums={10,1,10,10,10};
