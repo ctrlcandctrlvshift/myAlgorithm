@@ -1117,8 +1117,5 @@ return null;
     //优化
 
     public static void main(String[] args) {
-        int []nums={10,1,10,10,10};
-      //  List list=Arrays.asList(quiet(nums));
-        Arrays.stream(quiet(nums)).forEach(System.out::print);
     }
 }
