@@ -1,5 +1,6 @@
 import org.w3c.dom.Node;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -1162,9 +1163,85 @@ return null;
     }
 
 
+    //62. Unique Paths
+    public static int uniquePaths(int m, int n) {
+        if (m==0||n==0){
+            return 0;
+        }
+        if (m==1||n==1){
+            return 1;
+        }
+        return processUniquePaths(m,n,0,0);
+    }
+    public static int processUniquePaths(int m,int n,int down,int right){
+        if (down>=m||right>=n){
+            return 0;
+        }
+        if (down==m-1&&right==n-1){
+            return 1;
+        }
+        //往右走
+        int rightAns=processUniquePaths(m,n,down,right+1);
+        //往下走
+        int downAns=processUniquePaths(m,n,down+1,right);
+        return rightAns+downAns;
+    }
+    //动态规划
+    public static int uniquePathsDp(int m, int n) {
+        if (m==0||n==0){
+            return 0;
+        }
+        if (m==1||n==1){
+            return 1;
+        }
+        int [][]dp=new int[m+1][n+1];
+        for (int i = m-1; i >=0 ; i--) {
+            for (int j = n-1; j >=0 ; j--) {
+                if (i==m-1&&j==n-1){
+                    dp[i][j]=1;
+                    continue;
+                }
+                int rightAns=dp[i][j+1];
+                int downAns=dp[i+1][j];
+                dp[i][j]=rightAns+downAns;
+            }
+        }
+        return dp[0][0];
+    }
+
+
+
+    //56. Merge Intervals
+    public int[][] merge(int[][] intervals) {
+        if (intervals==null||intervals.length==0){
+            return intervals;
+        }
+        int start=0;
+        List<List<Integer>>lists=new ArrayList<>();
+        while (start<intervals.length){
+
+            int cur=start;
+            int next=start+1;
+            while (intervals[cur][1]>=intervals[next][0]){
+                cur++;
+                next++;
+            }
+            List<Integer> list=new ArrayList<>();
+            list.add(intervals[start][0]);
+            list.add(intervals[cur][1]);
+            lists.add(list);
+        }
+        int [][]res=new int[lists.size()][2];
+        for (int i = 0; i <lists.size() ; i++) {
+            
+        }
+    }
+
 
     public static void main(String[] args) {
-        int []nums={1,2,3};
-        List<List<Integer>>res=subsets(nums);
+       int m=3;
+       int n=7;
+       System.out.println(uniquePaths(m, n));
+        System.out.println(uniquePathsDp(m, n));
     }
 }
