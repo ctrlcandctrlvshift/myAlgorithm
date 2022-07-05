@@ -1115,7 +1115,43 @@ return null;
         return res;
     }
     //优化
+    //56
+    public static int[][] merge(int[][] intervals) {
+        if (intervals==null||intervals.length==0){
+            return null;
+        }
+        Arrays.sort(intervals,Comparator.comparingInt(i->i[0]));
+        List<List<Integer>>lists=new ArrayList<>();
+        int startIndex=0;
+        int max=intervals[0][1];
+        for (int i = 1; i <intervals.length; i++) {
+            if (max>=intervals[i][0]){
+                max=Math.max(max,intervals[i][1]);
+
+            }else {
+             List<Integer>list=new ArrayList<>();
+             list.add(intervals[startIndex][0]);
+             list.add(max);
+             lists.add(list);
+             startIndex=i;
+             max=intervals[i][1];
+            }
+        }
+            List<Integer>list=new ArrayList<>();
+            list.add(intervals[startIndex][0]);
+            list.add(max);
+            lists.add(list);
+
+        int [][]res=new int[lists.size()][2];
+        for (int i = 0; i < lists.size(); i++) {
+            res[i][0]=lists.get(i).get(0);
+            res[i][1]=lists.get(i).get(1);
+        }
+        return res;
+    }
 
     public static void main(String[] args) {
+        int [][] intervals={{1,4},{0,4}};
+        int [][]res= merge(intervals);
     }
 }
