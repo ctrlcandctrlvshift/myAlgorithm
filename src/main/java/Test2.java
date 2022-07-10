@@ -1114,8 +1114,13 @@ return null;
         }
         return res;
     }
-    //优化
+    //优化暂无
+
+
+
+
     //56
+    //估计有优化
     public static int[][] merge(int[][] intervals) {
         if (intervals==null||intervals.length==0){
             return null;
@@ -1150,8 +1155,142 @@ return null;
         return res;
     }
 
+
+    //139
+    public static boolean wordBreak(String s, List<String> wordDict) {
+        if (s==null||s.length()==0){
+            return false;
+        }
+        HashSet<String> map= new HashSet<>();
+        for (int i = 0; i < wordDict.size(); i++) {
+            map.add(wordDict.get(i));
+        }
+        return processWordBreak(s,map,0,1);
+    }
+    public static boolean processWordBreak(String s,HashSet <String> map,int ponits,int index){
+        String tmp=s.substring(ponits,index);
+        if (index==s.length()){
+            if (map.contains(tmp)){
+                return true;
+            }
+            return false;
+        }
+        boolean p1=false;
+        boolean p2=false;
+        if (map.contains(tmp)){
+            p1=processWordBreak(s,map,index,index+1);
+        }
+        p2=processWordBreak(s,map,ponits,index+1);
+        if (p1||p2){
+            return true;
+        }
+        return false;
+    }
+    public static boolean wordBreakDP(String s, List<String> wordDict) {
+        if (s==null||s.length()==0){
+            return false;
+        }
+        HashSet<String> map= new HashSet<>();
+        for (int i = 0; i < wordDict.size(); i++) {
+            map.add(wordDict.get(i));
+        }
+        int len=s.length();
+        boolean [][] dp=new boolean[len+2][len+2];
+        for (int i = len; i >=1; i--) {
+            for (int j = i; j >=0 ; j--) {
+                String tmp=s.substring(j,i);
+                if (i==s.length()){
+                    if (map.contains(tmp)){
+                        dp[i][j]=true;
+                        continue;
+                    }
+                    dp[i][j]=false;
+                    continue;
+                }
+                boolean p1=false;
+                boolean p2=false;
+                if (map.contains(tmp)){
+                    p1=dp[i+1][i];
+                }
+                p2=dp[i+1][j];
+                if (p1||p2){
+                    dp[i][j]=true;
+                    continue;
+                }
+                dp[i][j]=false;
+            }
+        }
+        return dp[1][0];
+    }
+
+    //79
+    public static boolean exist(char[][] board, String word) {
+        if (board==null||board.length==0){
+            return false;
+        }
+        for (int i = 0; i <board.length ; i++) {
+            for (int j = 0; j <board[0].length ; j++) {
+                if (processExist(board,word,i,j,0)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public static boolean processExist(char [][]board,String word,int down,int right,int index){
+        if (index==word.length()){
+            return true;
+        }
+        if (down>board.length-1||down<0||right>board[0].length-1||right<0){
+            return false;
+        }
+        char cur=board[down][right];
+        if (cur!=word.charAt(index)){
+            return false;
+        }
+        board[down][right]='*';
+        boolean p1=processExist(board,word,down+1,right,index+1); //false
+        boolean p2=processExist(board,word,down,right+1,index+1);
+        boolean p3=processExist(board,word,down-1,right,index+1);
+        boolean p4=processExist(board,word,down,right-1,index+1);
+        if (p1||p2||p3||p4){
+            return true;
+        }
+        board[down][right]=word.charAt(index);
+
+        return false;
+    }
+
+    //45
+    public static int jump(int[] nums) {
+        if (nums.length==0){
+            return 0;
+        }
+        return processJumoMin(nums,0,0);
+    }
+    public static int processJumoMin(int []nums,int index,int steps){
+        if (index==nums.length-1){
+            return steps;
+        }
+        if (index>nums.length-1){
+            return Integer.MAX_VALUE;
+        }
+        int  JumpStep=nums[index];
+        int min=Integer.MAX_VALUE;
+        for (int i = 1; i <=JumpStep; i++) {
+            int tmp=processJumoMin(nums,index+i,steps+1);
+            min=Math.min(min,tmp);
+        }
+        return min;
+    }
+
+
+    public static int jumpDp(int []nums){
+
+    }
+
     public static void main(String[] args) {
-        int [][] intervals={{1,4},{0,4}};
-        int [][]res= merge(intervals);
+        int []nums={2,3,0,1,4};
+        System.out.println(jump(nums));
     }
 }
