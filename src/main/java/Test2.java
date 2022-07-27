@@ -1626,101 +1626,86 @@ public class Test2 {
     public static String minWindow(String s, String t) {
         if (s == null || t == null) return null;
         if (s.length() == 0 || t.length() == 0) return "";
-        int left = 0;
-        int right = 0;
-        int sumTarget = 0;
-        int targetChar=' ';
-        //0 right 1 left
-        int open=0;
-        int first=0;
-        int minlen=Integer.MAX_VALUE;
-        int minL=-1;
-        int minR=-1;
-        LinkedList <Integer> lists=new LinkedList<>();
-        HashMap<Character,Integer> map=new HashMap<>();
+        if (t.length()>s.length())return  "";
+        HashMap<Character,Integer> need=new HashMap<>();
         HashMap<Character,Integer> record=new HashMap<>();
-
         for (int i = 0; i <t.length() ; i++) {
             if (!record.containsKey(t.charAt(i))){
-                record.put(t.charAt(i),0);
-            }
-            if (!map.containsKey(t.charAt(i))){
-                map.put(t.charAt(i),0);
+                record.put(t.charAt(i),1);
             }else {
-                map.put(t.charAt(i),map.get(t.charAt(i))+1);
+                record.put(t.charAt(i),record.get(t.charAt(i))+1);
+            }
+
+            if (!need.containsKey(t.charAt(i))){
+                need.put(t.charAt(i),1);
+            }else {
+                need.put(t.charAt(i),need.get(t.charAt(i))+1);
             }
         }
-
-
-        //1.找到第一个
-        for (int i = 0; i <s.length() ; i++) {
-            if (map.containsKey(s.charAt(i))){
-                left=i;
-                right=i;
-                sumTarget=1;
-                break;
-            }
+        int r=0;
+        int l=0;
+        int open=0;
+        int minl=-1;
+        int minr=-1;
+        int minLen=Integer.MAX_VALUE;
+        int numlen=t.length();
+       //处理第一个
+        if (need.containsKey(s.charAt(r))){
+            int val=need.get(s.charAt(r))-1;
+            need.put(s.charAt(r),val);
+            numlen--;
         }
-        while(right !=s.length()){
-
+        while (r<s.length()){
+            //进
             if (open==0){
+                if (++r>=s.length())break;
+                char cur=s.charAt(r);
+                if (need.containsKey(cur)){
+                    int val=need.get(cur)-1;
+                    need.put(cur,val);
+                    if (val<record.get(cur)&&val>=0)numlen--;
 
-                if (first==0){
-                    char curR=s.charAt(right);
-                    if (sumTarget==t.length()){
-                        int len=right-left;
-                        minlen=len;
-                        minL=left;
-                        minR=right;
+                    if (numlen<=0){
                         open=1;
-                        first=1;
-                        break;
+                       int len= r-l+1;
+                       if (len<minLen){
+                           minLen=len;
+                           minl=l;
+                           minr=r;
+                       }
                     }
-                    if (map.containsKey(curR)){
-                        record.put(curR,record.get(curR)+1);
-                        if (map.get(curR)>=record.get(curR)){
-                            sumTarget++;
-                        }
-                        lists.addLast(right);
-                    }
-
-                }else {
-                    right++;
-                    char curR=s.charAt(right);
-                    if (map.containsKey(curR)){
-                        if (curR==targetChar){
-                            int len=right-left;
-                            if (minlen>len){
-                                minL=left;
-                                minR=right;
-                                minlen=len;
-                            }
-
-                        }
-                            lists.add(right);
-                            record.put(curR,record.get(curR)+1);
-                    }
-
                 }
             }
-
+            //出
             if (open==1){
-                if (record.get(s.charAt(left))<=map.get(s.charAt(left))) {
-                    targetChar = s.charAt(left);
-                    open = 0;
-                }
-                record.put(s.charAt(left),record.get(s.charAt(left)-1));
-                    lists.removeFirst();
-                    left=lists.getFirst();
-            }
+                if (l==r)open=0;
 
+                char cur=s.charAt(l);
+                if (numlen<=0){
+                    int len= r-l+1;
+                    if (len<minLen){
+                        minl=l;
+                        minr=r;
+                    }
+                }
+                else {
+                    open=0;
+                }
+                if (need.containsKey(cur)){
+                    int val=need.get(cur)+1;
+                    if (val>0)numlen++;
+                    need.put(cur,val);
+                }
+                l++;
+            }
         }
-        return  s.substring(minL,minR+1);
+        return minl==-1&&minr==-1?s.charAt(0)==t.charAt(0)?t:"":s.substring(minl,minr+1);
     }
 
 
     public static void main(String[] args) {
-
-
+        String s="aa";
+        String t="a";
+        System.out.println(minWindow(s, t));
     }
 }
