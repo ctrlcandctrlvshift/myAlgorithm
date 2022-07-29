@@ -1627,6 +1627,10 @@ public class Test2 {
         if (s == null || t == null) return null;
         if (s.length() == 0 || t.length() == 0) return "";
         if (t.length()>s.length())return  "";
+        if (s.length() == 1){
+            if (s.charAt(0)==t.charAt(0))return t;
+            else return "";
+        }
         HashMap<Character,Integer> need=new HashMap<>();
         HashMap<Character,Integer> record=new HashMap<>();
         for (int i = 0; i <t.length() ; i++) {
@@ -1654,6 +1658,7 @@ public class Test2 {
             int val=need.get(s.charAt(r))-1;
             need.put(s.charAt(r),val);
             numlen--;
+            if (numlen==0)open=1;
         }
         while (r<s.length()){
             //进
@@ -1686,6 +1691,7 @@ public class Test2 {
                     if (len<minLen){
                         minl=l;
                         minr=r;
+                        minLen=len;
                     }
                 }
                 else {
@@ -1699,12 +1705,42 @@ public class Test2 {
                 l++;
             }
         }
-        return minl==-1&&minr==-1?s.charAt(0)==t.charAt(0)?t:"":s.substring(minl,minr+1);
+        return minl==-1&&minr==-1?"":s.substring(minl,minr+1);
     }
+    //30
+    public static List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> list=new ArrayList<>();
+        if (s==null||s.length()==0)return list;
+        int r=0;
+        int l=0;
+        HashMap<Character,List<Integer>> head=new HashMap<>();
+        int len=words.length;
+        for (int i = 0; i <words.length ; i++) {
+            char cur=words[i].charAt(0);
+            if (!head.containsKey(cur)){
+                List<Integer> indexs=new ArrayList<>();
+                indexs.add(i);
+                head.put(cur,indexs);
+            }else {
+                List<Integer> indexs=head.get(cur);
+                indexs.add(i);
+                head.put(cur,indexs);
+            }
+        }
+        boolean headIndex=true;
+        int wordIndex=0;
+        int wordCurIndex=0;
+
+        for (int i = 0; i <s.length() ; i++) {
+            char cur=
+
+        }
 
 
+
+    }
     public static void main(String[] args) {
-        String s="aa";
+        String s="ab";
         String t="a";
         System.out.println(minWindow(s, t));
     }
