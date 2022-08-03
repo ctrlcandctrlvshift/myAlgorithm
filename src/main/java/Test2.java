@@ -1708,6 +1708,7 @@ public class Test2 {
         return minl==-1&&minr==-1?"":s.substring(minl,minr+1);
     }
     //30
+    //未完成
     public static List<Integer> findSubstring(String s, String[] words) {
         List<Integer> list=new ArrayList<>();
         if (s==null||s.length()==0)return list;
@@ -1723,6 +1724,8 @@ public class Test2 {
                 head.put(cur,indexs);
             }else {
                 List<Integer> indexs=head.get(cur);
+
+
                 indexs.add(i);
                 head.put(cur,indexs);
             }
@@ -1731,17 +1734,198 @@ public class Test2 {
         int wordIndex=0;
         int wordCurIndex=0;
 
-        for (int i = 0; i <s.length() ; i++) {
-            char cur=
+        for (int i = 0; i <s.length();) {
+            char cur= s.charAt(i);
+            if (head.containsKey(cur)){
+                l=i;
+                headIndex=false;
+                List<Integer> wordsList= head.get(cur);
+                //R不回溯
+                for (int j = 0; j < wordsList.size(); j++) {
+
+                }
+            }
 
         }
+        return null;
+    }
 
 
+    //461
+    public static int hammingDistance(int x, int y) {
+        if (x==y){
+            return 0;
+        }
+        int res=x^y;
+        //求位数
+        int max=0;
+        if (x>y)max=x;
+        else max=y;
+        int count=0;
+        int tmp=max;
+        while (tmp!=0){
+            tmp/=2;
+            count++;
+        }
+        ++count;
+        //看有多少个1
+        int ans=0;
+        for (int i = 0; i < count; i++) {
+            int num=1<<i;
+            int t=num&res;
+            if (num==t)ans++;
+        }
+return ans;
+    }
+    //322
+
+
+    //什么垃圾方法
+    //丑中丑的代码
+    //巨难看
+    //能跑 但是是垃圾中的战斗机
+    //引以为戒
+    public static int coinChange(int[] coins, int amount) {
+        if (coins==null||coins.length==0||amount==0){
+            return 0;
+        }
+        Arrays.sort(coins);
+        HashMap<Integer,HashMap<Integer,Integer>> map=new HashMap<>();
+        int res=processLess(coins,0,amount,0,map);
+        return res==Integer.MAX_VALUE?-1:res;
+    }
+    public static int processLess(int [] coins, int haveMoney,int amount,int count,  HashMap<Integer,HashMap<Integer,Integer>> map){
+        if (haveMoney==amount){
+            return count;
+        }
+        if (map.containsKey(haveMoney)&&map.get(haveMoney).containsKey(count)){
+            return map.get(haveMoney).get(count);
+        }
+        if (haveMoney>amount){
+            return -1;
+        }
+        int res=Integer.MAX_VALUE;
+        if (haveMoney<amount){
+            for (int i = coins.length-1; i >=0 ; i--) {
+                if (haveMoney+coins[i]>0){
+                    int ans=processLess(coins,haveMoney+coins[i],amount,count+1,map);
+                    HashMap<Integer,Integer> h=new HashMap<>();
+                    h.put(count,res);
+                    map.put(haveMoney,h);
+                    if (ans>0){
+                        res=Math.min(res,ans);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    //记忆搜索
+    public static int coinChange2(int[] coins, int amount) {
+        if (coins==null||coins.length==0||amount==0){
+            return 0;
+        }
+        Arrays.sort(coins);
+        int []dp=new int[amount+1];
+        return processLess(amount,coins,dp);
+    }
+
+    public static int processLess(int haveMoney,int []coins,int []dp){
+        if (haveMoney==0){
+            return 0;
+        }
+        if (haveMoney<0){
+            return -1;
+        }
+        if (dp[haveMoney]!=0){
+            return dp[haveMoney];
+        }
+        int min=Integer.MAX_VALUE;
+        for (int i = coins.length-1; i >=0; i--) {
+                int res=processLess(haveMoney-coins[i],coins,dp);
+                if (res>=0&&min>res){
+                    min=res+1;
+            }
+        }
+
+        dp[haveMoney]=(min == Integer.MAX_VALUE) ? -1 : min;
+        return dp[haveMoney];
+    }
+
+    //全dp
+    public static int coinChangeDp(int[] coins, int amount) {
+        if (coins==null||coins.length==0||amount==0){
+            return 0;
+        }
+        int []dp=new int[amount+1];
+        for (int i = 1; i <= amount; i++) {
+            int min=Integer.MAX_VALUE;
+            for (int j = coins.length-1; j >=0; j--) {
+                if (i-coins[j]<0){
+                    continue;
+                }
+                int res= dp[i-coins[j]];
+                if (res>=0&&min>res){
+                    min=res+1;
+                }
+            }
+            dp[i]=(min == Integer.MAX_VALUE) ? -1 : min;
+        }
+        return dp[amount];
+    }
+
+//283
+    public static void moveZeroes(int[] nums) {
+        int zeroNum=0;
+        int zeroIndex=-1;
+        for (int i = 0; i <nums.length; i++) {
+            if (nums[i]==0){
+                zeroNum++;
+                zeroIndex=zeroIndex==-1?i:zeroIndex;
+            }else {
+                if (zeroIndex!=-1){
+                    nums[zeroIndex]=nums[i];
+                    zeroIndex++;
+                }
+            }
+        }
+        for (int i = nums.length-zeroNum; i < nums.length ; i++) {
+            nums[i]=0;
+        }
+    }
+
+    //169
+    public static int majorityElement(int[] nums) {
+        int len=nums.length;
+        int sumT=len%2!=0?(len/2)+1:len/2;
+        HashMap<Integer,Integer> map=new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            if (!map.containsKey(nums[i])){
+                map.put(nums[i],1);
+                if (map.get(nums[i])>=sumT)return nums[i];
+            }
+            else {
+                if (map.get(nums[i])+1>=sumT)return nums[i];
+                else map.put(nums[i],map.get(nums[i])+1);
+            }
+        }
+        return -1;
+    }
+
+
+    //292
+    public static boolean canWinNim(int n) {
+        return false;
+    }
+
+    //lcp 03
+    public boolean robot(String command, int[][] obstacles, int x, int y) {
 
     }
+
     public static void main(String[] args) {
-        String s="ab";
-        String t="a";
-        System.out.println(minWindow(s, t));
+        int [] nums={1};
+        System.out.println(majorityElement(nums));
     }
 }
