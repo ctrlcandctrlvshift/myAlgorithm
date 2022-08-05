@@ -1920,12 +1920,54 @@ return ans;
     }
 
     //lcp 03
-    public boolean robot(String command, int[][] obstacles, int x, int y) {
+    //路线是固定的 这可能是一个优化点
+    //先暴力 再好好考虑其他的
+    public static boolean robot(String command, int[][] obstacles, int x, int y) {
 
+
+        HashMap<Integer,List<Integer>> trap=new HashMap<>();
+        for (int i = 0; i <obstacles.length ; i++) {
+            int trapX=obstacles[i][0];
+            int trapY=obstacles[i][1];
+            if (trapX>x||trapY>y)continue;
+            if (!trap.containsKey(trapX)){
+                List<Integer> trapYlist=new ArrayList<>();
+                trapYlist.add(trapY);
+                trap.put(trapX,trapYlist);
+            }else {
+                trap.get(trapX).add(trapY);
+                trap.put(trapX,trap.get(trapX));
+            }
+        }
+
+        int stepSum=command.length();
+        int step=0;
+        int curX=0;
+        int curY=0;
+        while (true){
+            if (step>stepSum-1){
+                step=0;
+                continue;
+            }
+            char cur=command.charAt(step);
+            if (cur=='R')curX++;
+            if (cur=='U')curY++;
+            if (curX>x||curY>y) return false;
+            if (trap.containsKey(curX)){
+                for(Integer i:trap.get(curX)){
+                    if (i==curY)return false;
+                }
+            }
+            if (curX==x&&curY==y) return true;
+            step++;
+        }
     }
 
     public static void main(String[] args) {
-        int [] nums={1};
-        System.out.println(majorityElement(nums));
+        String command ="RRU";
+        int [][] obstacles ={{5,5},{9,4},{9,7},{6,4},{7,0},{9,5},{10,7},{1,1},{7,5}};
+        int x=7856;
+        int y=9033;
+        System.out.println(robot(command, obstacles, x, y));
     }
 }
