@@ -1923,8 +1923,6 @@ return ans;
     //路线是固定的 这可能是一个优化点
     //先暴力 再好好考虑其他的
     public static boolean robot(String command, int[][] obstacles, int x, int y) {
-
-
         HashMap<Integer,List<Integer>> trap=new HashMap<>();
         for (int i = 0; i <obstacles.length ; i++) {
             int trapX=obstacles[i][0];
@@ -1963,6 +1961,19 @@ return ans;
         }
     }
 
+    //lcp 01
+    public static int game(int[] guess, int[] answer) {
+        int sameNum=0;
+        for (int i = 0; i <guess.length ; i++) {
+            if (guess[i]==answer[i])sameNum++;
+        }
+        return sameNum;
+    }
+
+    //lcp 08
+    public static int[] getTriggerTime(int[][] increase, int[][] requirements) {
+
+    }
     public static void main(String[] args) {
         String command ="RRU";
         int [][] obstacles ={{5,5},{9,4},{9,7},{6,4},{7,0},{9,5},{10,7},{1,1},{7,5}};
