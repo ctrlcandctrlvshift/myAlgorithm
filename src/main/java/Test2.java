@@ -1971,14 +1971,81 @@ return ans;
     }
 
     //lcp 08
-    public static int[] getTriggerTime(int[][] increase, int[][] requirements) {
+//    public static int[] getTriggerTime(int[][] increase, int[][] requirements) {
+//
+//    }
 
+
+    //Lcp 10
+    public static double minimalExecTime(TreeNode root) {
+        if(root==null)return 0L;
+        TreeNode tmp=root;
+        Message m=findParallelTime(tmp);
+        return m.nodeTimes-m.parallelTime;
     }
+
+    static class Message{
+
+        double nodeTimes;
+        double parallelTime;
+        public Message(double nodeTimes, double parallelTime) {
+            //总时间
+            this.nodeTimes =nodeTimes;
+            //并行运行时间
+            this.parallelTime = parallelTime;
+        }
+    }
+
+    public static Message findParallelTime(TreeNode node){
+        if (node==null){
+            return new Message(0,0);
+        }
+
+        Message left=findParallelTime(node.left);
+        Message right=findParallelTime(node.right);
+
+        double lv=node.left==null?0:node.left.val;
+        double rv=node.right==null?0:node.right.val;
+        double cl = left.nodeTimes;
+        double cr = right.nodeTimes;
+        double tol = cl + cr + node.val;
+        double lp = left.parallelTime;
+        double rp = right.parallelTime;
+         if ((cl >= cr&&cl - 2 * lp <= cr)||(cr >= cl&&cr - 2 * rp <= cl)){
+             return new Message(tol,(cl + cr)/2);
+         }
+
+         if (cl - 2 * lp > cr){
+             return new Message(tol,lp + cr);
+         }else {
+             return new Message(tol, cl + rp);
+         }
+    }
+
     public static void main(String[] args) {
-        String command ="RRU";
-        int [][] obstacles ={{5,5},{9,4},{9,7},{6,4},{7,0},{9,5},{10,7},{1,1},{7,5}};
-        int x=7856;
-        int y=9033;
-        System.out.println(robot(command, obstacles, x, y));
+        TreeNode treeNode1=new TreeNode(1);
+        TreeNode treeNode2=new TreeNode(2);
+        TreeNode treeNode3=new TreeNode(3);
+        TreeNode treeNode4=new TreeNode(4);
+        TreeNode treeNode5=new TreeNode(4);
+
+        treeNode1.left=treeNode3;
+        treeNode1.right=treeNode2;
+        treeNode2.left=treeNode4;
+        treeNode2.right=treeNode5;
+
+        TreeNode tn1 = new TreeNode(75);
+        TreeNode tn2 = new TreeNode(18);
+        TreeNode tn3 = new TreeNode(20);
+        TreeNode tn4 = new TreeNode(27);
+        TreeNode tn5 = new TreeNode(36);
+
+        tn1.right=tn2;
+        tn2.right=tn3;
+        tn3.left=tn4;
+        tn3.right=tn5;
+
+        System.out.println(minimalExecTime(treeNode1));
+
     }
 }
